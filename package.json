@@ -1,0 +1,23 @@
+{
+  "name": "brain-freeze",
+  "version": "0.0.1",
+  "description": "Static front-end for api-********-plus",
+  "type": "module",
+  "scripts": {
+    "start": "vite",
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "vite preview"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "solid-better-refresh": "^0.0.4",
+    "typescript": "^5.7.2",
+    "vite": "^7.1.4",
+    "vite-plugin-solid": "3.0.0-next.5"
+  },
+  "dependencies": {
+    "solid-js": "2.0.0-beta.10",
+    "@solidjs/web": "2.0.0-beta.10"
+  }
+}

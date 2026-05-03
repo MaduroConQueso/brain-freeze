@@ -1,0 +1,48 @@
+:root {
+    --background-lighter: rgb(250, 249, 242);
+    --background-light: rgb(242, 240, 227);
+    --background-mid: rgb(222, 220, 204);
+    --background-dark: rgb(38, 36, 28);
+
+    --grey-lighter: rgb(252, 252, 253);
+    --grey-light: rgb(244, 244, 245);
+    --grey-mid: rgb(190, 190, 194);
+    --grey-dark: rgb(88, 88, 95);
+
+    --orange-lighter: rgb(252, 194, 182);
+    --orange-light: rgb(247, 111, 83);
+    --orange-dark: rgb(198, 66, 38);
+
+    --text-primary: rgb(34, 32, 25);
+    --text-secondary: rgb(106, 103, 93);
+    --text-muted: rgb(158, 156, 146);
+
+    --teal-light: rgb(128, 212, 207);
+    --teal: rgb(58, 172, 168);
+    --teal-dark: rgb(34, 120, 116);
+
+    --gold-light: rgb(248, 218, 138);
+    --gold: rgb(228, 174, 56);
+    --gold-dark: rgb(172, 126, 28);
+
+    --font-family-rounded:
+        ui-rounded, "Hiragino Maru Gothic ProN", Quicksand, Comfortaa, Manjari,
+        "Arial Rounded MT", "Arial Rounded MT Bold", Calibri, source-sans-pro,
+        sans-serif;
+}
+
+body {
+    margin: 0;
+    padding: 0px;
+
+    background-color: var(--background-light);
+}
+
+:root button:not(:disabled),
+:root [role="button"]:not(:disabled) {
+    cursor: pointer;
+}
+
+#root {
+    width: 100%;
+}

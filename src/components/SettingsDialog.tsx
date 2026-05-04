@@ -22,7 +22,7 @@ export const SettingsDialog: Component<{ id: string; onClose?: () => void }> = (
           name="apiEndpoint"
           placeholder="API Endpoint"
           value={store.apiEndpoint}
-          onChange={(e) =>
+          onBlur={(e) =>
             setStore((settings) => {
               settings.apiEndpoint = e.target.value;
             })

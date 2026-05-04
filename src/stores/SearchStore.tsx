@@ -4,6 +4,7 @@ import {
   createEffect,
   createMemo,
   createStore,
+  getOwner,
   latest,
   ParentComponent,
   refresh,
@@ -52,31 +53,34 @@ function createSearchStore() {
   });
 
   const searchResults = createMemo<CollatedSearchResults | undefined>(
-    (prev) => {
+    async (prev) => {
       if (store.activeToken === undefined) return prev;
-      return collateSearchResults(store.activeToken);
+
+      const results = await collateSearchResults(
+        store.activeToken,
+        settings.apiEndpoint,
+      );
+
+      return results;
     },
   );
 
-  const search = async (searchQuery: string) => {
-    setStore((draft) => {
-      draft.searchQuery = searchQuery;
-    });
+  const sortedSearchResults = createMemo<CollatedSearchResults | undefined>(
+    (prev) => {
+      const results = searchResults();
+      if (results === undefined) return prev;
+      if (!settings.smartSort) return results;
 
-    if (!settings.apiEndpoint) return;
-
-    const queuedSearch = await postSearch(settings.apiEndpoint, searchQuery);
-    setStore((draft) => {
-      draft.activeToken = queuedSearch.token;
-    });
-  };
-
-  const restoreExistingSearch = (searchQuery: string, activeToken: number) => {
-    setStore((draft) => {
-      draft.searchQuery = searchQuery;
-      draft.activeToken = activeToken;
-    });
-  };
+      return {
+        ...results,
+        responses: [...results.responses].sort((a, b) => {
+          const aScore = smartScore(a);
+          const bScore = smartScore(b);
+          return bScore - aScore;
+        }),
+      };
+    },
+  );
 
   createEffect(
     () => [store.activeToken, searchResults] as const,
@@ -101,9 +105,29 @@ function createSearchStore() {
     },
   );
 
+  const search = async (searchQuery: string) => {
+    setStore((draft) => {
+      draft.searchQuery = searchQuery;
+    });
+
+    if (!settings.apiEndpoint) return;
+
+    const queuedSearch = await postSearch(settings.apiEndpoint, searchQuery);
+    setStore((draft) => {
+      draft.activeToken = queuedSearch.token;
+    });
+  };
+
+  const restoreExistingSearch = (searchQuery: string, activeToken: number) => {
+    setStore((draft) => {
+      draft.searchQuery = searchQuery;
+      draft.activeToken = activeToken;
+    });
+  };
+
   return {
     store,
-    searchResults,
+    searchResults: sortedSearchResults,
     search,
     restoreExistingSearch,
   };
@@ -142,13 +166,10 @@ export type UserFile = {
 
 async function collateSearchResults(
   token: number,
+  apiEndpoint: string,
   limit: number = 1500,
 ): Promise<CollatedSearchResults> {
-  const { store: settings } = useSettingsStore();
-  const results = await getSearchResults(
-    latest(() => settings.apiEndpoint),
-    { token, limit },
-  );
+  const results = await getSearchResults(apiEndpoint, { token, limit });
 
   // might be overwrought
   // I believe ES2015 now preserves insertion order for objects
@@ -189,14 +210,6 @@ async function collateSearchResults(
     });
 
     userResponse.folders[folderName] = folder;
-  }
-
-  if (latest(() => settings.smartSort)) {
-    userResponses.sort((a, b) => {
-      const aScore = smartScore(a);
-      const bScore = smartScore(b);
-      return bScore - aScore;
-    });
   }
 
   const wasAgo = Math.abs(Date.now() - results.created_at * 1000) > 120_000; // milliseconds

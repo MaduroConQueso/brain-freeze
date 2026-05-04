@@ -3,12 +3,13 @@
     background-color: var(--background-lighter);
 
     width: calc(100% - 48px);
+    max-width: 640px;
     min-height: 360px;
     max-height: 720px;
 }
 
 .body {
-    min-height: calc(360px - 48px);
+    min-height: 360px;
     margin: 6px;
     padding: 18px;
     border: 1px solid var(--grey-light);

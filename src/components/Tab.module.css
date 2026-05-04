@@ -1,36 +1,19 @@
 .tab-bar {
-  position: fixed;
-  width: 100%;
-  left: 12px;
-  bottom: 16px;
-  
-  display: flex;
-  flex-direction: row;
-  gap: 8px;
-}
+    position: fixed;
+    width: 100%;
+    left: 12px;
+    bottom: 12px;
 
-.tab {
-  padding: 8px 12px;
-  border: none;
-  border-radius: 24px;
-  box-shadow: 0 4px 8px rgba(128, 128, 128, 0.5);
-
-  font-size: 1rem;
-  font-family: var(--font-family-rounded);
-  
-  background-color: var(--grey-light);
-  color: black;
-
-  transition: box-shadow 0.2s ease;
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
 }
 
 .tab:not(.tab-active):hover {
-  color: var(--orange-light);
+    color: var(--primary-lighter);
 }
 
 .tab-active {
-  background-color: var(--orange-light);
-  color: white;
-
-  box-shadow: inset 0px 2px 4px 0px rgba(128, 128, 128, 0.2);
+    background-color: var(--primary);
+    color: var(--primary-text);
 }

@@ -1,14 +1,18 @@
 .dialog {
     border: 1px solid var(--grey-mid);
     background-color: var(--background-lighter);
-    box-shadow: 0 4px 12px var(--grey-mid);
-    padding: 24px 24px 16px 24px;
 
-    max-width: calc(100% - 96px);
-    max-height: calc(100% - 96px);
+    width: calc(100% - 48px);
+    min-height: 360px;
 }
 
 .body {
+    height: 100%;
+    min-height: 360px;
+    margin: 6px;
+    padding: 18px;
+    border: 1px solid var(--grey-light);
+
     display: grid;
     grid-template-rows: 1fr auto;
     gap: 12px;
@@ -18,21 +22,4 @@
     display: flex;
     justify-content: flex-end;
     gap: 8px;
-}
-
-.button {
-    background-color: var(--grey-light);
-    border: none;
-    padding: 8px 12px;
-    color: black;
-    font-size: 1rem;
-}
-
-.button:hover {
-    color: var(--orange-light);
-}
-
-.button:active {
-    background-color: var(--orange-light);
-    color: white;
 }

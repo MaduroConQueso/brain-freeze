@@ -15,7 +15,7 @@ export const SettingsDialog: Component<{ id: string; onClose?: () => void }> = (
       contentClass={styles.settingsDialogContent}
       onClose={props.onClose}
     >
-      <label>
+      <label class={styles.multiline}>
         <span>API Endpoint</span>
         <input
           type="text"
@@ -29,8 +29,7 @@ export const SettingsDialog: Component<{ id: string; onClose?: () => void }> = (
           }
         />
       </label>
-      <label>
-        <span>Enable smart-sort</span>
+      <label class={styles.singleline}>
         <input
           type="checkbox"
           name="smartSort"
@@ -41,6 +40,7 @@ export const SettingsDialog: Component<{ id: string; onClose?: () => void }> = (
             })
           }
         />
+        <span>Enable smart-sort</span>
       </label>
     </Dialog>
   );

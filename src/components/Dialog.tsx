@@ -9,7 +9,7 @@ export const Dialog: ParentComponent<{
   additionalFooter?: SolidElement;
 }> = (props) => {
   return (
-    <dialog id={props.id} class={styles.dialog} on:close={props.onClose}>
+    <dialog id={props.id} class={styles.dialog} onClose={props.onClose}>
       <div class={styles.body}>
         <div class={[styles.content, props.contentClass]}>{props.children}</div>
         <footer class={styles.footer}>

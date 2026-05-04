@@ -46,9 +46,6 @@ export const SearchResults: Component = () => {
 
   return (
     <main class={styles.searchResults}>
-      <Show when={searchRefreshing()}>
-        <hr class={styles.loader} />
-      </Show>
       <Errored fallback={(error) => <pre>{error()}</pre>}>
         <Loading fallback={<p>Loading...</p>}>
           <For each={searchResults()?.responses}>
@@ -119,13 +116,13 @@ const UserFolder: Component<{
   };
 
   return (
-    <>
-      <div class={styles.folder} onClick={onClickFolder}>
-        <div class={styles.folderHeader}>
+    <div class={styles.folder} onClick={onClickFolder}>
+      <header class={styles.folderHeader}>
+        <div class={styles.folderPath}>
           /{props.response.username}/
           <strong class={styles.folderName}>{props.folderName}</strong>/
         </div>
-        <div class={styles.folderSubHeader}>
+        <div class={styles.folderDetails}>
           <Show when={props.response.isPrivate}>
             <span class={styles.private}>private</span>
           </Show>
@@ -136,9 +133,9 @@ const UserFolder: Component<{
           </Show>
           <span class={styles.speed}>{speed()} MiB/s</span>
         </div>
-        <For each={props.files}>{(file) => <Track file={file()} />}</For>
-      </div>
-    </>
+      </header>
+      <For each={props.files}>{(file) => <Track file={file()} />}</For>
+    </div>
   );
 };
 

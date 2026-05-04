@@ -6,48 +6,34 @@
     padding-bottom: 72px;
 }
 
-.loader {
-    border: 1px dotted var(--orange-light);
-    margin: 0 12px 0;
-    height: 0px;
-
-    transform: translateY(0px);
-
-    /* fade in fade out pulsing animation */
-    animation: pulse 1.5s infinite;
-}
-
-@keyframes pulse {
-    0% {
-        opacity: 0;
-    }
-    50% {
-        opacity: 0.5;
-    }
-    100% {
-        opacity: 0;
-    }
-}
-
 .user {
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    font-family: var(--font-family-rounded);
+}
+
+.folder {
     padding-bottom: 12px;
-    border-bottom: 2px inset var(--background-mid);
+    border-bottom: 1px solid var(--background-mid);
 }
 
 .folderHeader {
-    color: var(--text-secondary);
-    padding: 8px 12px 0px;
-    font-size: 1.25rem;
-
     position: sticky;
     top: 0px;
+    padding: 12px 12px 1rem;
+
+    display: grid;
+    grid-template-columns: 1fr minmax(128px, max-content);
+
     background-color: var(--background-light);
+    color: var(--text-secondary);
 
     cursor: pointer;
+}
+
+.folderPath::before {
+    content: "📁 ";
+    font-size: 0.8rem;
 }
 
 .folderName {
@@ -57,15 +43,14 @@
     word-break: break-word;
 }
 
-.folderSubHeader {
-    padding: 0px 12px 8px;
-    font-size: 1em;
-
-    text-align: right;
+.folderDetails {
+    display: flex;
+    flex-direction: column;
+    align-items: end;
 }
 
 .private {
-    color: var(--gold);
+    color: var(--tertiary);
 }
 
 .private::before {
@@ -73,7 +58,7 @@
 }
 
 .queue {
-    color: var(--orange-light);
+    color: var(--secondary);
 }
 
 .queue::before {

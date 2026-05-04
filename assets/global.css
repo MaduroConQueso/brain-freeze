@@ -1,29 +1,40 @@
 :root {
-    --background-lighter: rgb(250, 249, 242);
-    --background-light: rgb(242, 240, 227);
-    --background-mid: rgb(222, 220, 204);
-    --background-dark: rgb(38, 36, 28);
+    /* colors poached from rose-pine neovim theme */
+    color-scheme: light dark;
 
-    --grey-lighter: rgb(252, 252, 253);
-    --grey-light: rgb(244, 244, 245);
-    --grey-mid: rgb(190, 190, 194);
-    --grey-dark: rgb(88, 88, 95);
+    --background-lighter: light-dark(#fffaf3, #2a273f);
+    --background-light: light-dark(#faf4ed, #232136);
+    --background-mid: light-dark(#f2e9e1, #393552);
+    --background-dark: light-dark(#f8f0e7, #1f1d30);
 
-    --orange-lighter: rgb(252, 194, 182);
-    --orange-light: rgb(247, 111, 83);
-    --orange-dark: rgb(198, 66, 38);
+    --grey-lighter: light-dark(#f4ede8, #56526e);
+    --grey-light: light-dark(#dfdad9, #44415a);
+    --grey-mid: light-dark(#cecacd, #393552);
+    --grey-dark: light-dark(#797593, #6e6a86);
 
-    --text-primary: rgb(34, 32, 25);
-    --text-secondary: rgb(106, 103, 93);
-    --text-muted: rgb(158, 156, 146);
+    /* text meant for sitting on background */
+    --text-primary: light-dark(#464261, #e0def4);
+    --text-secondary: light-dark(#797593, #908caa);
+    --text-muted: light-dark(#9893a5, #6e6a86);
 
-    --teal-light: rgb(128, 212, 207);
-    --teal: rgb(58, 172, 168);
-    --teal-dark: rgb(34, 120, 116);
+    /* text meant for sitting on colors */
+    --primary-text: light-dark(#fffaf3, #232136);
+    --secondary-text: light-dark(#fffaf3, #232136);
+    --tertiary-text: light-dark(#232136, #232136);
+    --grey-text: light-dark(#232136, #fffaf3);
 
-    --gold-light: rgb(248, 218, 138);
-    --gold: rgb(228, 174, 56);
-    --gold-dark: rgb(172, 126, 28);
+    --primary-text: light-dark(#fffaf3, #232136);
+    --primary-lighter: light-dark(#d7827e, #ea9a97);
+    --primary: light-dark(#b4637a, #eb6f92);
+    --primary-dark: light-dark(#8a3e5a, #c44f72);
+
+    --secondary-lighter: light-dark(#56949f, #9ccfd8);
+    --secondary: light-dark(#286983, #3e8fb0);
+    --secondary-dark: light-dark(#1a4e63, #2a6a88);
+
+    --tertiary-lighter: light-dark(#f4c87e, #fad9a0);
+    --tertiary: light-dark(#ea9d34, #f6c177);
+    --tertiary-dark: light-dark(#a06918, #cc8f25);
 
     --font-family-rounded:
         ui-rounded, "Hiragino Maru Gothic ProN", Quicksand, Comfortaa, Manjari,
@@ -31,18 +42,46 @@
         sans-serif;
 }
 
-body {
-    margin: 0;
-    padding: 0px;
-
-    background-color: var(--background-light);
-}
-
 :root button:not(:disabled),
 :root [role="button"]:not(:disabled) {
     cursor: pointer;
 }
 
-#root {
-    width: 100%;
+body {
+    background-color: var(--background-light);
+    color: var(--text-primary);
+    font-family: var(--font-family-rounded);
+}
+
+button {
+    background-color: var(--grey-lighter);
+    border: none;
+    padding: 8px 12px;
+    color: var(--text-primary);
+}
+
+@media (hover: hover) {
+    button:hover {
+        background-color: var(--grey-light);
+    }
+}
+
+button:active {
+    background-color: var(--grey-mid);
+    color: var(--grey-text);
+    font-weight: 600;
+}
+
+input[type="search"],
+input[type="text"] {
+    font-size: 1rem;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+    vertical-align: baseline;
+    position: relative;
+    bottom: 0.1rem;
+    width: 1.25rem;
+    height: 1.25rem;
 }

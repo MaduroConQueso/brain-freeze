@@ -50,12 +50,6 @@ export const SearchBar: Component = () => {
           enterkeyhint="search"
           value={store.searchQuery}
         />
-        <input
-          class={styles.searchButton}
-          type="submit"
-          name="submit"
-          value="🔍"
-        />
       </form>
       <div class={styles.moreRow}>
         <button

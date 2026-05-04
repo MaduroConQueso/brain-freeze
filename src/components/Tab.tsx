@@ -1,4 +1,4 @@
-import { Component, createSignal } from "solid-js";
+import { Component, createEffect, createSignal } from "solid-js";
 
 import styles from "./Tab.module.css";
 import { JSX } from "@solidjs/web/jsx-runtime";
@@ -6,20 +6,27 @@ import { SettingsDialog } from "./SettingsDialog";
 
 export type Tabs = "search" | "downloads" | "uploads" | "settings";
 
-export const [activeTab, setActiveTab] = createSignal<Tabs>("search");
+export const [activeTab, setActiveTab] = createSignal<Tabs>("settings");
 
 export const TabBar: Component = () => {
+  createEffect(
+    () => activeTab(),
+    (tab, prevTab) => {
+      if (tab === "settings") {
+        const dialog = document.getElementById(
+          "settings-dialog",
+        ) as HTMLDialogElement;
+        dialog?.showModal();
+      }
+    },
+  );
+
   return (
     <div class={styles["tab-bar"]}>
       <Tab id="search" name="Search" />
       <Tab id="downloads" name="Downloads" />
       <Tab id="uploads" name="Uploads" />
-      <Tab
-        id="settings"
-        name="Settings"
-        command="show-modal"
-        commandfor="settings-dialog"
-      />
+      <Tab id="settings" name="Settings" />
       <SettingsDialog
         id="settings-dialog"
         onClose={() => setActiveTab("search")}

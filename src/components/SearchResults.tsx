@@ -118,20 +118,22 @@ const UserFolder: Component<{
   return (
     <div class={styles.folder} onClick={onClickFolder}>
       <header class={styles.folderHeader}>
-        <div class={styles.folderPath}>
-          /{props.response.username}/
-          <strong class={styles.folderName}>{props.folderName}</strong>/
-        </div>
-        <div class={styles.folderDetails}>
-          <Show when={props.response.isPrivate}>
-            <span class={styles.private}>private</span>
-          </Show>
-          <Show when={props.response.queuePosition > 0}>
-            <span class={styles.queue}>
-              {props.response.queuePosition} in line
-            </span>
-          </Show>
-          <span class={styles.speed}>{speed()} MiB/s</span>
+        <div class={styles.folderHeaderInner}>
+          <div class={styles.folderPath}>
+            /{props.response.username}/
+            <strong class={styles.folderName}>{props.folderName}</strong>/
+          </div>
+          <div class={styles.folderDetails}>
+            <Show when={props.response.isPrivate}>
+              <span class={styles.private}>private</span>
+            </Show>
+            <Show when={props.response.queuePosition > 0}>
+              <span class={styles.queue}>
+                {props.response.queuePosition} in line
+              </span>
+            </Show>
+            <span class={styles.speed}>{speed()} MiB/s</span>
+          </div>
         </div>
       </header>
       <For each={props.files}>{(file) => <Track file={file()} />}</For>

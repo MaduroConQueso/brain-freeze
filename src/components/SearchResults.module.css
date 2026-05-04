@@ -18,17 +18,29 @@
 }
 
 .folderHeader {
+    container-type: scroll-state;
     position: sticky;
     top: 0px;
-    padding: 12px 12px 1rem;
+}
 
+.folderHeaderInner {
+    padding: 12px 12px 1rem;
     display: grid;
     grid-template-columns: 1fr minmax(128px, max-content);
-
     background-color: var(--background-light);
     color: var(--text-secondary);
-
     cursor: pointer;
+
+    transition:
+        background-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+@container scroll-state(stuck: top) {
+    .folderHeaderInner {
+        background-color: var(--background-mid);
+        box-shadow: 0 2px 4px var(--grey-light);
+    }
 }
 
 .folderPath::before {

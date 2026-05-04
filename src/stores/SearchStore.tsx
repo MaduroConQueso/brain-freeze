@@ -6,6 +6,7 @@ import {
   createStore,
   getOwner,
   latest,
+  onSettled,
   ParentComponent,
   refresh,
   Store,
@@ -31,6 +32,13 @@ export const SearchStoreContext = createContext<SearchStoreContextType>();
 export const SearchStoreProvider: ParentComponent = (props) => {
   const { store, search, searchResults, restoreExistingSearch } =
     createSearchStore();
+
+  // grab search from URL if given
+  onSettled(() => {
+    const defaultSearch = getDefaultSearch();
+    if (defaultSearch) search(defaultSearch);
+  });
+
   return (
     <SearchStoreContext
       value={{ store, search, searchResults, restoreExistingSearch }}
@@ -275,4 +283,15 @@ function smartScore(response: UserResponse): number {
   // weigh faster connections higher, but again logarithmically
   baseScore += Math.log(response.uploadSpeed / 1_000_000 + 1.0) * 10;
   return baseScore;
+}
+
+function getDefaultSearch() {
+  const params = new URLSearchParams(location.search);
+  const qSearch = params.get("q");
+
+  const hash = location.hash;
+  const hashParams = new URLSearchParams(hash);
+  const hashQSearch = hashParams.get("q");
+
+  return qSearch ?? hashQSearch ?? "";
 }

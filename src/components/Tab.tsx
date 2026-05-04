@@ -1,17 +1,25 @@
-import { Component, createEffect, createSignal } from "solid-js";
+import { Component, createEffect, createSignal, onSettled } from "solid-js";
 
 import styles from "./Tab.module.css";
 import { JSX } from "@solidjs/web/jsx-runtime";
 import { SettingsDialog } from "./SettingsDialog";
+import { useSettingsStore } from "../stores/SettingsStore";
 
 export type Tabs = "search" | "downloads" | "uploads" | "settings";
 
-export const [activeTab, setActiveTab] = createSignal<Tabs>("settings");
+export const [activeTab, setActiveTab] = createSignal<Tabs>("search");
 
 export const TabBar: Component = () => {
+  const { store: settings } = useSettingsStore();
+  onSettled(() => {
+    if (!settings.apiEndpoint) {
+      setActiveTab("settings");
+    }
+  });
+
   createEffect(
     () => activeTab(),
-    (tab, prevTab) => {
+    (tab) => {
       if (tab === "settings") {
         const dialog = document.getElementById(
           "settings-dialog",

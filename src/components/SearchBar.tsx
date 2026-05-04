@@ -8,7 +8,7 @@ import { useSettingsStore } from "../stores/SettingsStore";
 
 export const SearchBar: Component = () => {
   const { store: settings } = useSettingsStore();
-  const { store, setStore } = useSearchStore();
+  const { store, search: enqueueSearch } = useSearchStore();
 
   const onSearch = async (evt: SubmitEvent) => {
     evt.preventDefault();
@@ -24,19 +24,7 @@ export const SearchBar: Component = () => {
       return;
     }
 
-    setStore((draft) => {
-      draft.searchQuery = searchQuery;
-    });
-
-    // TODO send to some sort of system, should not be in callback
-    if (!settings.apiEndpoint) {
-      return;
-    }
-
-    const queuedSearch = await postSearch(settings.apiEndpoint, searchQuery);
-    setStore((draft) => {
-      draft.activeToken = queuedSearch.token;
-    });
+    await enqueueSearch(searchQuery);
   };
 
   return (
@@ -81,7 +69,7 @@ export const SearchBar: Component = () => {
 
 export const SearchHistory: Component<{ onHistory?: () => void }> = (props) => {
   const { store: settings } = useSettingsStore();
-  const { setStore } = useSearchStore();
+  const { restoreExistingSearch } = useSearchStore();
 
   const searchHistory = createMemo(() => {
     if (!settings.apiEndpoint) {
@@ -92,11 +80,7 @@ export const SearchHistory: Component<{ onHistory?: () => void }> = (props) => {
   });
 
   const onClick = (search: HistoricalSearch) => {
-    setStore((draft) => {
-      draft.searchQuery = search.query;
-      draft.activeToken = search.token;
-    });
-
+    restoreExistingSearch(search.query, search.token);
     props.onHistory?.();
   };
 

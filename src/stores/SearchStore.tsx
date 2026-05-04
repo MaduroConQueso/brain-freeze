@@ -7,10 +7,10 @@ import {
   latest,
   ParentComponent,
   refresh,
+  Store,
   useContext,
 } from "solid-js";
-import { getSearchResults, SearchItem } from "../api/search";
-import { StoreObject } from "../utils/types";
+import { getSearchResults, postSearch, SearchItem } from "../api/search";
 import { useSettingsStore } from "./SettingsStore";
 
 export type SearchStore = {
@@ -18,15 +18,22 @@ export type SearchStore = {
   activeToken: number | undefined;
 };
 
-export type SearchStoreContextType = StoreObject<SearchStore> & {
+export type SearchStoreContextType = {
+  store: Store<SearchStore>;
   searchResults: Accessor<CollatedSearchResults | undefined>;
+
+  search: (searchQuery: string) => Promise<void>;
+  restoreExistingSearch: (searchQuery: string, activeToken: number) => void;
 };
 
 export const SearchStoreContext = createContext<SearchStoreContextType>();
 export const SearchStoreProvider: ParentComponent = (props) => {
-  const { store, setStore, searchResults } = createSearchStore();
+  const { store, search, searchResults, restoreExistingSearch } =
+    createSearchStore();
   return (
-    <SearchStoreContext value={{ store, setStore, searchResults }}>
+    <SearchStoreContext
+      value={{ store, search, searchResults, restoreExistingSearch }}
+    >
       {props.children}
     </SearchStoreContext>
   );
@@ -37,6 +44,8 @@ export const useSearchStore = () => {
 };
 
 function createSearchStore() {
+  const { store: settings } = useSettingsStore();
+
   const [store, setStore] = createStore({
     searchQuery: "",
     activeToken: undefined as number | undefined,
@@ -48,6 +57,26 @@ function createSearchStore() {
       return collateSearchResults(store.activeToken);
     },
   );
+
+  const search = async (searchQuery: string) => {
+    setStore((draft) => {
+      draft.searchQuery = searchQuery;
+    });
+
+    if (!settings.apiEndpoint) return;
+
+    const queuedSearch = await postSearch(settings.apiEndpoint, searchQuery);
+    setStore((draft) => {
+      draft.activeToken = queuedSearch.token;
+    });
+  };
+
+  const restoreExistingSearch = (searchQuery: string, activeToken: number) => {
+    setStore((draft) => {
+      draft.searchQuery = searchQuery;
+      draft.activeToken = activeToken;
+    });
+  };
 
   createEffect(
     () => [store.activeToken, searchResults] as const,
@@ -74,8 +103,9 @@ function createSearchStore() {
 
   return {
     store,
-    setStore,
     searchResults,
+    search,
+    restoreExistingSearch,
   };
 }
 

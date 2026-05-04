@@ -1,7 +1,8 @@
 export type EnqueueDownloadArgs = {
   username: string;
   virtual_path: string;
-  bypass_filter: boolean;
+  folder_path?: string;
+  bypass_filter?: boolean;
 };
 
 export type EnqueuedDownload = EnqueueDownloadArgs & {
@@ -12,7 +13,12 @@ export type EnqueuedDownload = EnqueueDownloadArgs & {
 
 export async function enqueueDownload(
   endpoint: string,
-  { username, virtual_path, bypass_filter }: EnqueueDownloadArgs,
+  {
+    username,
+    virtual_path,
+    folder_path,
+    bypass_filter = false,
+  }: EnqueueDownloadArgs,
 ): Promise<EnqueuedDownload> {
   const url = new URL("/downloads/enqueue", endpoint);
   const response = await fetch(url, {
@@ -20,7 +26,12 @@ export async function enqueueDownload(
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ username, virtual_path, bypass_filter }),
+    body: JSON.stringify({
+      username,
+      virtual_path,
+      folder_path,
+      bypass_filter,
+    }),
   });
 
   if (!response.ok) {

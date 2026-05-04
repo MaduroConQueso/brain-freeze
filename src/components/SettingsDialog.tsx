@@ -20,11 +20,25 @@ export const SettingsDialog: Component<{ id: string; onClose?: () => void }> = (
         <input
           type="text"
           name="apiEndpoint"
-          placeholder="API Endpoint"
+          placeholder="https://my-server:12339/"
           value={store.apiEndpoint}
           onBlur={(e) =>
             setStore((settings) => {
               settings.apiEndpoint = e.target.value;
+            })
+          }
+        />
+      </label>
+      <label class={styles.multiline}>
+        <span>Download Folder (full path)</span>
+        <input
+          type="text"
+          name="downloadFolder"
+          placeholder="/path/to/download/folder/complete"
+          value={store.downloadFolder}
+          onBlur={(e) =>
+            setStore((settings) => {
+              settings.downloadFolder = e.target.value;
             })
           }
         />

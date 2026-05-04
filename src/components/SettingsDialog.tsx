@@ -31,6 +31,10 @@ export const SettingsDialog: Component<{ id: string; onClose?: () => void }> = (
       </label>
       <label class={styles.multiline}>
         <span>Download Folder (full path)</span>
+        <span class={styles.subtitle}>
+          If you leave this blank, all downloaded files will be saved unsorted
+          to the default download folder.
+        </span>
         <input
           type="text"
           name="downloadFolder"

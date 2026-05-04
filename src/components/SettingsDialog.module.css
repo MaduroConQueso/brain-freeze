@@ -24,6 +24,10 @@
     font-weight: 600;
 }
 
+.subtitle {
+    color: var(--text-muted);
+}
+
 .settingsDialogContent label input {
     justify-self: start;
 }

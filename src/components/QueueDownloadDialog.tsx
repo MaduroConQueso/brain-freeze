@@ -28,7 +28,9 @@ export const QueueDownloadDialog: Component<QueueDownloadDialogProps> = (
         enqueueDownload(settings.apiEndpoint, {
           username,
           virtual_path: filePath,
-          folder_path: `${settings.downloadFolder}/${getParentFolder(filePath)}`,
+          folder_path: settings.downloadFolder
+            ? `${settings.downloadFolder}/${getParentFolder(filePath)}`
+            : undefined,
           bypass_filter: false,
         }),
       ),

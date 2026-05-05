@@ -22,6 +22,19 @@
 .content {
     overflow-y: auto;
     max-height: 60vh;
+    border: 1px solid transparent;
+
+    transition: border-color 0.3s ease;
+}
+
+.content.topGlow {
+    border-top: 2px dotted
+        color-mix(in srgb, var(--secondary-lighter), transparent 70%);
+}
+
+.content.bottomGlow {
+    border-bottom: 2px dotted
+        color-mix(in srgb, var(--secondary-lighter), transparent 70%);
 }
 
 .footer {

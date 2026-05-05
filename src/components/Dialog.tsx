@@ -1,4 +1,8 @@
-import { Element as SolidElement, ParentComponent } from "solid-js";
+import {
+  Element as SolidElement,
+  ParentComponent,
+  createSignal,
+} from "solid-js";
 import styles from "./Dialog.module.css";
 
 export const Dialog: ParentComponent<{
@@ -8,10 +12,34 @@ export const Dialog: ParentComponent<{
   contentClass?: string;
   additionalFooter?: SolidElement;
 }> = (props) => {
+  let contentRef!: HTMLDivElement;
+  const [atTop, setAtTop] = createSignal(true);
+  const [atBottom, setAtBottom] = createSignal(true);
+
+  const onScroll = (evt: Event) => {
+    const target = evt.target as HTMLDivElement;
+    setAtBottom(
+      target.scrollHeight - 12 <= target.scrollTop + target.clientHeight,
+    );
+    setAtTop(target.scrollTop === 0);
+  };
+
   return (
     <dialog id={props.id} class={styles.dialog} onClose={props.onClose}>
       <div class={styles.body}>
-        <div class={[styles.content, props.contentClass]}>{props.children}</div>
+        <div
+          ref={contentRef}
+          onFocusIn={onScroll}
+          on:scroll={onScroll}
+          class={[
+            styles.content,
+            !atBottom() && styles.bottomGlow,
+            !atTop() && styles.topGlow,
+            props.contentClass,
+          ]}
+        >
+          {props.children}
+        </div>
         <footer class={styles.footer}>
           <button class={styles.button} commandfor={props.id} command="close">
             Close

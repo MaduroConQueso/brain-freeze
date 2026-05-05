@@ -431,7 +431,14 @@ function hasMinimumQuality(file: UserFile, qualityString: string): boolean {
       .trim()
       .split("/")
       .map(Number);
-    return bitDepth >= qBitDepth && samplerate >= qSampleRate;
+
+    if (isNaN(qSampleRate) && qBitDepth > 0) {
+      // user only specified bitrate, like for a lossy file
+      // all lossless files pass bitrate checks
+      return true;
+    } else {
+      return bitDepth >= qBitDepth && samplerate >= qSampleRate;
+    }
   }
 
   return false;

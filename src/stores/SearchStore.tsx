@@ -91,7 +91,8 @@ function createSearchStore() {
           for (const file of folder) {
             if (
               filterString &&
-              !file.fullPath.toLowerCase().includes(filterString)
+              !file.fullPath.toLowerCase().includes(filterString) &&
+              !item.username.toLowerCase().includes(filterString)
             )
               continue;
             if (!matchesCategory(file, filters.fileType)) continue;

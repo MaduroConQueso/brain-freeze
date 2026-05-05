@@ -5,15 +5,18 @@ import { SearchResults } from "./components/SearchResults";
 import { TabBar } from "./components/Tab";
 import { SearchStoreProvider } from "./stores/SearchStore";
 import { SettingsStoreProvider } from "./stores/SettingsStore";
+import { FilterStoreProvider } from "./stores/FilterStore";
 
 const Snapp: Component = () => {
   return (
     <SettingsStoreProvider>
-      <SearchStoreProvider>
-        <SearchBar />
-        <SearchResults />
-        <TabBar />
-      </SearchStoreProvider>
+      <FilterStoreProvider>
+        <SearchStoreProvider>
+          <SearchBar />
+          <SearchResults />
+          <TabBar />
+        </SearchStoreProvider>
+      </FilterStoreProvider>
     </SettingsStoreProvider>
   );
 };

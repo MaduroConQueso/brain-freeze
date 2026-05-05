@@ -1,10 +1,17 @@
-import { createMemo, For, Loading, type Component } from "solid-js";
+import {
+  createMemo,
+  createOptimistic,
+  For,
+  Loading,
+  type Component,
+} from "solid-js";
 
 import { getSearchHistory, HistoricalSearch, postSearch } from "../api/search";
 import styles from "./SearchBar.module.css";
 import { useSearchStore } from "../stores/SearchStore";
 import { Dialog } from "./Dialog";
 import { useSettingsStore } from "../stores/SettingsStore";
+import { FilterDialog } from "./FilterDialog";
 
 export const SearchBar: Component = () => {
   const { store: settings } = useSettingsStore();
@@ -47,7 +54,13 @@ export const SearchBar: Component = () => {
         >
           History
         </button>
-        <button class={styles.moreButton}>Filters</button>
+        <button
+          class={styles.moreButton}
+          command="show-modal"
+          commandfor="filter-dialog"
+        >
+          Filters
+        </button>
       </div>
 
       <Dialog id="history-dialog">
@@ -63,6 +76,8 @@ export const SearchBar: Component = () => {
           />
         </Loading>
       </Dialog>
+
+      <FilterDialog id="filter-dialog" />
     </div>
   );
 };
@@ -71,9 +86,11 @@ export const SearchHistory: Component<{ onHistory?: () => void }> = (props) => {
   const { store: settings } = useSettingsStore();
   const { restoreExistingSearch } = useSearchStore();
 
-  const searchHistory = createMemo(() => {
+  const [searchHistory, _setOptimisticSearchHistory] = createOptimistic<
+    HistoricalSearch[]
+  >((prev = []) => {
     if (!settings.apiEndpoint) {
-      return [];
+      return prev;
     }
 
     return getSearchHistory(settings.apiEndpoint);

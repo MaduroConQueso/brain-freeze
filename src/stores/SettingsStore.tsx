@@ -12,7 +12,6 @@ import { StoreObject } from "../utils/types";
 export type SettingsStore = {
   apiEndpoint: string;
   downloadFolder: string;
-  smartSort: boolean;
 };
 
 export type SettingsStoreContextType = StoreObject<SettingsStore> & {};
@@ -38,7 +37,6 @@ const createSettingsStore = () => {
     JSON.parse(localStorage.getItem("settings") ?? "null") ?? {
       apiEndpoint: "",
       downloadFolder: "",
-      smartSort: false,
     },
   );
 

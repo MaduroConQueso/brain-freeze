@@ -3,6 +3,7 @@ import { useSettingsStore } from "../stores/SettingsStore";
 import { Dialog } from "./Dialog";
 
 import styles from "./SettingsDialog.module.css";
+import formStyles from "./Form.module.css";
 
 export const SettingsDialog: Component<{ id: string; onClose?: () => void }> = (
   props,
@@ -15,7 +16,7 @@ export const SettingsDialog: Component<{ id: string; onClose?: () => void }> = (
       contentClass={styles.settingsDialogContent}
       onClose={props.onClose}
     >
-      <label class={styles.multiline}>
+      <label class={formStyles.multiline}>
         <span>API Endpoint</span>
         <input
           type="text"
@@ -29,9 +30,9 @@ export const SettingsDialog: Component<{ id: string; onClose?: () => void }> = (
           }
         />
       </label>
-      <label class={styles.multiline}>
+      <label class={formStyles.multiline}>
         <span>Download Folder (full path)</span>
-        <span class={styles.subtitle}>
+        <span class={formStyles.subtitle}>
           If you leave this blank, all downloaded files will be saved unsorted
           to the default download folder.
         </span>
@@ -46,19 +47,6 @@ export const SettingsDialog: Component<{ id: string; onClose?: () => void }> = (
             })
           }
         />
-      </label>
-      <label class={styles.singleline}>
-        <input
-          type="checkbox"
-          name="smartSort"
-          checked={store.smartSort}
-          onChange={(e) =>
-            setStore((settings) => {
-              settings.smartSort = e.target.checked;
-            })
-          }
-        />
-        <span>Enable smart-sort</span>
       </label>
     </Dialog>
   );

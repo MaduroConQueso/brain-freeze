@@ -16,6 +16,7 @@ export async function postSearch(
     },
     body: JSON.stringify({
       query: query,
+      switch_page: false,
     }),
   });
 

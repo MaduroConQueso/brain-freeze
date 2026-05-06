@@ -3,9 +3,9 @@ import { type Component } from "solid-js";
 import { SearchBar } from "./components/SearchBar";
 import { SearchResults } from "./components/SearchResults";
 import { TabBar } from "./components/Tab";
+import { FilterStoreProvider } from "./stores/FilterStore";
 import { SearchStoreProvider } from "./stores/SearchStore";
 import { SettingsStoreProvider } from "./stores/SettingsStore";
-import { FilterStoreProvider } from "./stores/FilterStore";
 
 const Snapp: Component = () => {
   return (

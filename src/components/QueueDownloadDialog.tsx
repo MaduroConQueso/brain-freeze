@@ -1,10 +1,11 @@
-import { action, Component } from "solid-js";
-import { Dialog } from "./Dialog";
+import { Component, useContext } from "solid-js";
+
+import { enqueueDownload } from "../api/download";
 import { UserFile, UserResponse } from "../stores/SearchStore";
+import { SettingsStoreContext } from "../stores/SettingsStore";
+import { Dialog } from "./Dialog";
 
 import dialogStyles from "./Dialog.module.css";
-import { enqueueDownload } from "../api/download";
-import { useSettingsStore } from "../stores/SettingsStore";
 
 export type QueueDownloadDialogProps = {
   id: string;
@@ -18,7 +19,7 @@ export type QueueDownloadDialogProps = {
 export const QueueDownloadDialog: Component<QueueDownloadDialogProps> = (
   props,
 ) => {
-  const { store: settings } = useSettingsStore();
+  const { store: settings } = useContext(SettingsStoreContext);
 
   const downloadFolder = async (username: string, filePaths: string[]) => {
     // TODO convert to an action

@@ -1,21 +1,22 @@
 import {
-  createMemo,
   createOptimistic,
   For,
   Loading,
+  useContext,
   type Component,
 } from "solid-js";
 
-import { getSearchHistory, HistoricalSearch, postSearch } from "../api/search";
-import styles from "./SearchBar.module.css";
-import { useSearchStore } from "../stores/SearchStore";
+import { getSearchHistory, HistoricalSearch } from "../api/search";
+import { SearchStoreContext } from "../stores/SearchStore";
+import { SettingsStoreContext } from "../stores/SettingsStore";
 import { Dialog } from "./Dialog";
-import { useSettingsStore } from "../stores/SettingsStore";
 import { FilterDialog } from "./FilterDialog";
 
+import styles from "./SearchBar.module.css";
+
 export const SearchBar: Component = () => {
-  const { store: settings } = useSettingsStore();
-  const { store, search: enqueueSearch } = useSearchStore();
+  const { store: settings } = useContext(SettingsStoreContext);
+  const { store, search: enqueueSearch } = useContext(SearchStoreContext);
 
   const onSearch = async (evt: SubmitEvent) => {
     evt.preventDefault();
@@ -83,8 +84,8 @@ export const SearchBar: Component = () => {
 };
 
 export const SearchHistory: Component<{ onHistory?: () => void }> = (props) => {
-  const { store: settings } = useSettingsStore();
-  const { restoreExistingSearch } = useSearchStore();
+  const { store: settings } = useContext(SettingsStoreContext);
+  const { restoreExistingSearch } = useContext(SearchStoreContext);
 
   const [searchHistory, _setOptimisticSearchHistory] = createOptimistic<
     HistoricalSearch[]

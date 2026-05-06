@@ -1,14 +1,15 @@
-import { Component } from "solid-js";
-import { useSettingsStore } from "../stores/SettingsStore";
+import { Component, useContext } from "solid-js";
+
+import { SettingsStoreContext } from "../stores/SettingsStore";
 import { Dialog } from "./Dialog";
 
-import styles from "./SettingsDialog.module.css";
 import formStyles from "./Form.module.css";
+import styles from "./SettingsDialog.module.css";
 
 export const SettingsDialog: Component<{ id: string; onClose?: () => void }> = (
   props,
 ) => {
-  const { store, setStore } = useSettingsStore();
+  const { store, setStore } = useContext(SettingsStoreContext);
 
   return (
     <Dialog

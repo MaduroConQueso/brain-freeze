@@ -5,8 +5,8 @@ import {
   deep,
   ParentComponent,
   snapshot,
-  useContext,
 } from "solid-js";
+
 import { StoreObject } from "../utils/types";
 
 export type SettingsStore = {
@@ -20,19 +20,6 @@ export const SettingsStoreContext = createContext<SettingsStoreContextType>(
   {} as SettingsStoreContextType,
 );
 export const SettingsStoreProvider: ParentComponent = (props) => {
-  const { store, setStore } = createSettingsStore();
-  return (
-    <SettingsStoreContext value={{ store, setStore }}>
-      {props.children}
-    </SettingsStoreContext>
-  );
-};
-
-export const useSettingsStore = () => {
-  return useContext(SettingsStoreContext);
-};
-
-const createSettingsStore = () => {
   const [store, setStore] = createStore<SettingsStore>(
     JSON.parse(localStorage.getItem("settings") ?? "null") ?? {
       apiEndpoint: "",
@@ -48,5 +35,9 @@ const createSettingsStore = () => {
     },
   );
 
-  return { store, setStore };
+  return (
+    <SettingsStoreContext value={{ store, setStore }}>
+      {props.children}
+    </SettingsStoreContext>
+  );
 };

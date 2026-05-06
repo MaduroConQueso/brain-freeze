@@ -1,44 +1,44 @@
 .dialog {
-    border: 1px solid var(--grey-mid);
-    background-color: var(--background-lighter);
+  border: 1px solid var(--grey-mid);
+  background-color: var(--background-lighter);
 
-    width: calc(100% - 48px);
-    max-width: 640px;
-    min-height: 360px;
-    max-height: min(90vh, 720px);
+  width: calc(100% - 48px);
+  max-width: 640px;
+  min-height: 360px;
+  max-height: min(90vh, 720px);
 }
 
 .body {
-    min-height: 360px;
-    margin: 6px;
-    padding: 18px;
-    border: 1px solid var(--grey-light);
+  min-height: 360px;
+  margin: 6px;
+  padding: 18px;
+  border: 1px solid var(--grey-light);
 
-    display: grid;
-    grid-template-rows: 1fr auto;
-    gap: 12px;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  gap: 12px;
 }
 
 .content {
-    overflow-y: auto;
-    max-height: 60vh;
-    border: 1px solid transparent;
+  overflow-y: auto;
+  max-height: 60vh;
+  border: 1px solid transparent;
 
-    transition: border-color 0.3s ease;
+  transition: border-color 0.3s ease;
 }
 
 .content.topGlow {
-    border-top: 2px dotted
-        color-mix(in srgb, var(--secondary-lighter), transparent 70%);
+  border-top: 2px dotted
+    color-mix(in srgb, var(--secondary-lighter), transparent 70%);
 }
 
 .content.bottomGlow {
-    border-bottom: 2px dotted
-        color-mix(in srgb, var(--secondary-lighter), transparent 70%);
+  border-bottom: 2px dotted
+    color-mix(in srgb, var(--secondary-lighter), transparent 70%);
 }
 
 .footer {
-    display: flex;
-    justify-content: flex-end;
-    gap: 8px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
 }

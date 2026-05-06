@@ -1,38 +1,38 @@
 .searchBar {
-    margin: 12px 12px 0;
+  margin: 12px 12px 0;
 
-    display: grid;
-    grid-template-columns: 1fr auto;
-    grid-template-rows: 48px min-content;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: 48px min-content;
 }
 
 .searchForm {
-    display: contents;
+  display: contents;
 }
 
 .search {
-    height: 48px;
+  height: 48px;
 
-    border: 1px solid var(--grey-light);
-    background-color: var(--background-lighter);
-    padding-left: 0.5rem;
-    outline: none;
+  border: 1px solid var(--grey-light);
+  background-color: var(--background-lighter);
+  padding-left: 0.5rem;
+  outline: none;
 }
 
 .moreRow {
-    grid-column: 1 / span 2;
+  grid-column: 1 / span 2;
 
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
 }
 
 .moreButton:first-of-type {
-    border-right: 1px dotted var(--grey-mid);
+  border-right: 1px dotted var(--grey-mid);
 }
 
 .searchHistory {
-    color: var(--text-primary);
-    list-style: none;
-    padding: 0;
-    margin: 0;
+  color: var(--text-primary);
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }

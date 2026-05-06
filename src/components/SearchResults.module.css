@@ -1,108 +1,108 @@
 .searchResults {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
 
-    padding-bottom: 72px;
+  padding-bottom: 72px;
 }
 
 .user {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
 }
 
 .folder {
-    padding-bottom: 12px;
-    border-bottom: 1px solid var(--background-mid);
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--background-mid);
 }
 
 .folderHeader {
-    container-type: scroll-state;
-    position: sticky;
-    top: 0px;
+  container-type: scroll-state;
+  position: sticky;
+  top: 0px;
 }
 
 .folderHeaderInner {
-    padding: 12px 12px 1rem;
-    display: grid;
-    grid-template-columns: 1fr minmax(128px, max-content);
-    background-color: var(--background-light);
-    color: var(--text-secondary);
-    cursor: pointer;
+  padding: 12px 12px 1rem;
+  display: grid;
+  grid-template-columns: 1fr minmax(128px, max-content);
+  background-color: var(--background-light);
+  color: var(--text-secondary);
+  cursor: pointer;
 
-    transition:
-        background-color 0.2s ease,
-        box-shadow 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 @container scroll-state(stuck: top) {
-    .folderHeaderInner {
-        background-color: var(--background-mid);
-        box-shadow: 0 2px 4px var(--grey-light);
-    }
+  .folderHeaderInner {
+    background-color: var(--background-mid);
+    box-shadow: 0 2px 4px var(--grey-light);
+  }
 }
 
 .folderPath::before {
-    content: "📁 ";
-    font-size: 0.8rem;
+  content: "📁 ";
+  font-size: 0.8rem;
 }
 
 .folderName {
-    color: var(--text-primary);
-    font-weight: 600;
+  color: var(--text-primary);
+  font-weight: 600;
 
-    word-break: break-word;
+  word-break: break-word;
 }
 
 .folderDetails {
-    display: flex;
-    flex-direction: column;
-    align-items: end;
+  display: flex;
+  flex-direction: column;
+  align-items: end;
 }
 
 .private {
-    color: var(--tertiary);
+  color: var(--tertiary);
 }
 
 .private::before {
-    content: "🔒";
+  content: "🔒";
 }
 
 .queue {
-    color: var(--secondary);
+  color: var(--secondary);
 }
 
 .queue::before {
-    content: "⌛";
+  content: "⌛";
 }
 
 .speed {
-    color: var(--text-secondary);
+  color: var(--text-secondary);
 }
 
 .speed::before {
-    content: "↓";
+  content: "↓";
 }
 
 .track {
-    display: grid;
-    grid-template-columns: 1fr min-content minmax(94px, max-content);
+  display: grid;
+  grid-template-columns: 1fr min-content minmax(94px, max-content);
 
-    padding: 0 12px;
+  padding: 0 12px;
 }
 
 .trackName {
-    word-break: break-word;
+  word-break: break-word;
 
-    padding-left: 12px;
-    text-indent: -12px;
-    padding-right: 12px;
+  padding-left: 12px;
+  text-indent: -12px;
+  padding-right: 12px;
 
-    cursor: pointer;
+  cursor: pointer;
 }
 
 .trackDetails {
-    color: var(--text-secondary);
-    text-align: right;
+  color: var(--text-secondary);
+  text-align: right;
 }

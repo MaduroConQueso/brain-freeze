@@ -1,19 +1,19 @@
 .tab-bar {
-    position: fixed;
-    width: 100%;
-    left: 12px;
-    bottom: 12px;
+  position: fixed;
+  width: 100%;
+  left: 12px;
+  bottom: 12px;
 
-    display: flex;
-    flex-direction: row;
-    gap: 8px;
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
 }
 
 .tab:not(.tab-active):hover {
-    color: var(--primary-lighter);
+  color: var(--primary-lighter);
 }
 
 .tab-active {
-    background-color: var(--primary);
-    color: var(--primary-text);
+  background-color: var(--primary);
+  color: var(--primary-text);
 }

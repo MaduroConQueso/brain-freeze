@@ -8,19 +8,27 @@ import {
   For,
   isPending,
   Loading,
+  onSettled,
   Show,
   untrack,
+  useContext,
   type Component,
 } from "solid-js";
-import { UserFile, UserResponse, useSearchStore } from "../stores/SearchStore";
-import styles from "./SearchResults.module.css";
+
+import {
+  SearchStoreContext,
+  UserFile,
+  UserResponse,
+} from "../stores/SearchStore";
 import {
   QueueDownloadDialog,
   QueueDownloadDialogProps,
 } from "./QueueDownloadDialog";
 
+import styles from "./SearchResults.module.css";
+
 export const SearchResults: Component = () => {
-  const { searchResults } = useSearchStore();
+  const { searchResults } = useContext(SearchStoreContext);
   const searchRefreshing = () => isPending(() => searchResults());
 
   const [queueDialogProps, setQueueDialogProps] =
@@ -34,14 +42,14 @@ export const SearchResults: Component = () => {
     props: Omit<QueueDownloadDialogProps, "onClose">,
   ) => {
     setQueueDialogProps(props);
-    setTimeout(() => {
+    onSettled(() => {
       const dialog = document.getElementById(
         props.id,
       ) as HTMLDialogElement | null;
       if (dialog) {
         dialog.showModal();
       }
-    }, 0);
+    });
   };
 
   return (

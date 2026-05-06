@@ -10,9 +10,10 @@ import {
   Store,
   useContext,
 } from "solid-js";
+
 import { getSearchResults, postSearch, SearchItem } from "../api/search";
-import { useSettingsStore } from "./SettingsStore";
-import { FileType, FilterStoreContext } from "./FilterStore";
+import { FileType, FilterStore, FilterStoreContext } from "./FilterStore";
+import { SettingsStoreContext } from "./SettingsStore";
 
 export type SearchStore = {
   searchQuery: string;
@@ -29,30 +30,7 @@ export type SearchStoreContextType = {
 
 export const SearchStoreContext = createContext<SearchStoreContextType>();
 export const SearchStoreProvider: ParentComponent = (props) => {
-  const { store, search, searchResults, restoreExistingSearch } =
-    createSearchStore();
-
-  // grab search from URL if given
-  onSettled(() => {
-    const defaultSearch = getDefaultSearch();
-    if (defaultSearch) search(defaultSearch);
-  });
-
-  return (
-    <SearchStoreContext
-      value={{ store, search, searchResults, restoreExistingSearch }}
-    >
-      {props.children}
-    </SearchStoreContext>
-  );
-};
-
-export const useSearchStore = () => {
-  return useContext(SearchStoreContext);
-};
-
-function createSearchStore() {
-  const { store: settings } = useSettingsStore();
+  const { store: settings } = useContext(SettingsStoreContext);
   const { store: filters } = useContext(FilterStoreContext);
 
   const [store, setStore] = createStore({
@@ -78,44 +56,7 @@ function createSearchStore() {
       const results = searchResults();
       if (results === undefined) return prev;
 
-      const filterString = filters.filterString?.toLowerCase();
-
-      const filtered: UserResponse[] = [];
-      for (const item of results.responses) {
-        if (filters.hidePrivate && item.isPrivate) continue;
-        if (filters.hideQueue && item.queuePosition > 0) continue;
-
-        const filteredItemFolders: Record<string, UserFile[]> = {};
-        for (const [folderName, folder] of Object.entries(item.folders)) {
-          const filteredFolder: UserFile[] = [];
-          for (const file of folder) {
-            if (
-              filterString &&
-              !file.fullPath.toLowerCase().includes(filterString) &&
-              !item.username.toLowerCase().includes(filterString)
-            )
-              continue;
-            if (!matchesCategory(file, filters.fileType)) continue;
-            if (
-              filters.minQuality.trim() &&
-              !hasMinimumQuality(file, filters.minQuality)
-            )
-              continue;
-
-            filteredFolder.push(file);
-          }
-
-          if (
-            filters.minFilesInFolder > filteredFolder.length ||
-            filteredFolder.length <= 0
-          )
-            continue;
-          filteredItemFolders[folderName] = filteredFolder;
-        }
-
-        if (Object.keys(filteredItemFolders).length === 0) continue;
-        filtered.push({ ...item, folders: filteredItemFolders });
-      }
+      const filtered: UserResponse[] = filterSearchResults(results, filters);
 
       return {
         ...results,
@@ -228,13 +169,25 @@ function createSearchStore() {
     });
   };
 
-  return {
-    store,
-    searchResults: sortedSearchResults,
-    search,
-    restoreExistingSearch,
-  };
-}
+  // grab search from URL if given
+  onSettled(() => {
+    const defaultSearch = getDefaultSearch();
+    if (defaultSearch) search(defaultSearch);
+  });
+
+  return (
+    <SearchStoreContext
+      value={{
+        store,
+        search,
+        searchResults: sortedSearchResults,
+        restoreExistingSearch,
+      }}
+    >
+      {props.children}
+    </SearchStoreContext>
+  );
+};
 
 export type CollatedSearchResults = {
   atLimit: boolean;
@@ -266,6 +219,52 @@ export type UserFile = {
   attributes: Record<string, number>;
   fullPath: string;
 };
+
+function filterSearchResults(
+  results: CollatedSearchResults,
+  // WARN: tracked!!
+  filters: Readonly<FilterStore>,
+) {
+  const filtered: UserResponse[] = [];
+  const filterString = filters.filterString?.toLowerCase();
+
+  for (const item of results.responses) {
+    if (filters.hidePrivate && item.isPrivate) continue;
+    if (filters.hideQueue && item.queuePosition > 0) continue;
+
+    const filteredItemFolders: Record<string, UserFile[]> = {};
+    for (const [folderName, folder] of Object.entries(item.folders)) {
+      const filteredFolder: UserFile[] = [];
+      for (const file of folder) {
+        if (
+          filterString &&
+          !file.fullPath.toLowerCase().includes(filterString) &&
+          !item.username.toLowerCase().includes(filterString)
+        )
+          continue;
+        if (!matchesCategory(file, filters.fileType)) continue;
+        if (
+          filters.minQuality.trim() &&
+          !hasMinimumQuality(file, filters.minQuality)
+        )
+          continue;
+
+        filteredFolder.push(file);
+      }
+
+      if (
+        filters.minFilesInFolder > filteredFolder.length ||
+        filteredFolder.length <= 0
+      )
+        continue;
+      filteredItemFolders[folderName] = filteredFolder;
+    }
+
+    if (Object.keys(filteredItemFolders).length === 0) continue;
+    filtered.push({ ...item, folders: filteredItemFolders });
+  }
+  return filtered;
+}
 
 async function collateSearchResults(
   token: number,

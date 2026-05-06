@@ -1,8 +1,5 @@
 import { Component, For, useContext } from "solid-js";
-import { Dialog } from "./Dialog";
 
-import styles from "./FilterDialog.module.css";
-import formStyles from "./Form.module.css";
 import {
   FileType,
   fileTypeMap,
@@ -12,6 +9,10 @@ import {
   sortDirectionMap,
   sortMap,
 } from "../stores/FilterStore";
+import { Dialog } from "./Dialog";
+
+import styles from "./FilterDialog.module.css";
+import formStyles from "./Form.module.css";
 
 export const FilterDialog: Component<{ id: string; onClose?: () => void }> = (
   props,

@@ -1,6 +1,7 @@
 import {
   createContext,
   createEffect,
+  createProjection,
   createStore,
   deep,
   ParentComponent,
@@ -59,6 +60,14 @@ export const FilterStoreProvider: ParentComponent = (props) => {
     },
   );
 
+  const trimmedStore = createProjection(
+    (draft: FilterStore) => {
+      draft.filterString = draft.filterString.toLowerCase().trim();
+      draft.minQuality = draft.minQuality.trim();
+    },
+    store,
+  );
+
   createEffect(
     () => deep(store),
     (store) => {
@@ -76,7 +85,7 @@ export const FilterStoreProvider: ParentComponent = (props) => {
   );
 
   return (
-    <FilterStoreContext value={{ store, setStore }}>
+    <FilterStoreContext value={{ store: trimmedStore, setStore }}>
       {props.children}
     </FilterStoreContext>
   );

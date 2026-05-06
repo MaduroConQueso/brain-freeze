@@ -2,6 +2,7 @@ import {
   createOptimistic,
   For,
   Loading,
+  refresh,
   Show,
   useContext,
   type Component
@@ -45,6 +46,7 @@ export const SearchBar: Component = () => {
     }
 
     await enqueueSearch(searchQuery);
+    refresh(searchHistory);
   };
 
   return (

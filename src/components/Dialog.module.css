@@ -11,7 +11,7 @@
 .body {
   min-height: 360px;
   margin: 6px;
-  padding: 18px;
+  padding: 10px;
   border: 1px solid var(--grey-light);
 
   display: grid;
@@ -20,21 +20,21 @@
 }
 
 .content {
+  overflow-x: visible;
   overflow-y: auto;
   max-height: 60vh;
   border: 1px solid transparent;
+  padding: 8px;
 
   transition: border-color 0.3s ease;
 }
 
 .content.topGlow {
-  border-top: 2px dotted
-    color-mix(in srgb, var(--secondary-lighter), transparent 70%);
+  border-top: 2px dotted color-mix(in srgb, var(--secondary-lighter), transparent 70%);
 }
 
 .content.bottomGlow {
-  border-bottom: 2px dotted
-    color-mix(in srgb, var(--secondary-lighter), transparent 70%);
+  border-bottom: 2px dotted color-mix(in srgb, var(--secondary-lighter), transparent 70%);
 }
 
 .footer {

@@ -1,13 +1,10 @@
 import {
   Accessor,
   createContext,
-  createEffect,
   createMemo,
-  createStore,
+  createSignal,
   onSettled,
   ParentComponent,
-  refresh,
-  Store,
   useContext,
 } from "solid-js";
 
@@ -21,10 +18,10 @@ export type SearchStore = {
 };
 
 export type SearchStoreContextType = {
-  store: Store<SearchStore>;
+  searchQuery: Accessor<string>;
   searchResults: Accessor<CollatedSearchResults | undefined>;
 
-  search: (searchQuery: string) => Promise<void>;
+  enqueueSearch: (searchQuery: string) => void;
   restoreExistingSearch: (searchQuery: string, activeToken: number) => void;
 };
 
@@ -33,47 +30,54 @@ export const SearchStoreProvider: ParentComponent = (props) => {
   const { store: settings } = useContext(SettingsStoreContext);
   const { store: filters } = useContext(FilterStoreContext);
 
-  const [store, setStore] = createStore({
-    searchQuery: "",
-    activeToken: undefined as number | undefined,
+  const [searchQuery, setSearchQuery] = createSignal("");
+  const [activeToken, setActiveToken] = createSignal<number | undefined>();
+
+  const searchResultsStream = createMemo(async function* () {
+    const token = activeToken();
+    if (token === undefined) return;
+
+    const apiEndpoint = settings.apiEndpoint;
+
+    for await (const results of collateAllSearchResults(token, apiEndpoint)) {
+      yield results;
+    }
   });
-
-  const searchResults = createMemo<CollatedSearchResults | undefined>(
-    async (prev) => {
-      if (store.activeToken === undefined) return prev;
-
-      const results = await collateSearchResults(
-        store.activeToken,
-        settings.apiEndpoint,
-      );
-
-      return results;
-    },
-  );
 
   const filteredSearchResults = createMemo<CollatedSearchResults | undefined>(
     (prev) => {
-      const results = searchResults();
+      const results = searchResultsStream();
       if (results === undefined) return prev;
+      if (results.responses.length <= 0 && !results.atLimit) return prev;
 
+      console.time('filterSearchResults')
+      const prefilterFolderCount = results.responses.flatMap(response => Object.values(response.folders)).length;
+      console.log('PREFILTERED', results.responses.length, prefilterFolderCount);
       const filtered: UserResponse[] = filterSearchResults(results, filters);
+      const postfilterFolderCount = filtered.flatMap(response => Object.values(response.folders)).length;
+      console.log('FILTERED', filtered.length, postfilterFolderCount);
+      console.timeEnd('filterSearchResults');
 
       return {
         ...results,
         responses: filtered,
+        prefilterCount: prefilterFolderCount,
+        postfilterCount: postfilterFolderCount,
       };
     },
   );
 
   const sortedSearchResults = createMemo<CollatedSearchResults | undefined>(
     (prev) => {
-      const results = filteredSearchResults();
+      let results = filteredSearchResults();
       if (results === undefined) return prev;
+
+      console.time('sortedSearchResults')
 
       if (filters.sort === "relevancy") {
         const sorted = results.responses;
 
-        return {
+        results = {
           ...results,
           responses:
             filters.sortDirection === "asc" ? sorted.toReversed() : sorted,
@@ -88,7 +92,7 @@ export const SearchStoreProvider: ParentComponent = (props) => {
           return (bScore - aScore) * sortDirection;
         });
 
-        return {
+        results = {
           ...results,
           responses: sorted,
         };
@@ -102,7 +106,7 @@ export const SearchStoreProvider: ParentComponent = (props) => {
           return (bScore - aScore) * sortDirection;
         });
 
-        return {
+        results = {
           ...results,
           responses: sorted,
         };
@@ -116,71 +120,43 @@ export const SearchStoreProvider: ParentComponent = (props) => {
           return (bScore - aScore) * sortDirection;
         });
 
-        return {
+        results = {
           ...results,
           responses: sorted,
         };
       }
 
+      console.timeEnd('sortedSearchResults')
+
       return results;
     },
   );
 
-  createEffect(
-    () => [store.activeToken, searchResults] as const,
-    ([token, results]) => {
-      if (token === undefined) return;
-
-      let refreshCount = 0;
-      const timer = setInterval(() => {
-        refreshCount++;
-        if (refreshCount >= 10) {
-          return clearInterval(timer);
-        }
-
-        if (results()?.atLimit) {
-          return clearInterval(timer);
-        }
-
-        refresh(results);
-      }, 1000);
-
-      return () => clearInterval(timer);
-    },
-  );
-
-  const search = async (searchQuery: string) => {
-    setStore((draft) => {
-      draft.searchQuery = searchQuery;
-    });
-
+  const enqueueSearch = async (query: string) => {
+    setSearchQuery(query);
     if (!settings.apiEndpoint) return;
 
-    const queuedSearch = await postSearch(settings.apiEndpoint, searchQuery);
-    setStore((draft) => {
-      draft.activeToken = queuedSearch.token;
-    });
+    const postResults = await postSearch(settings.apiEndpoint, query);
+    setActiveToken(postResults.token);
   };
 
   const restoreExistingSearch = (searchQuery: string, activeToken: number) => {
-    setStore((draft) => {
-      draft.searchQuery = searchQuery;
-      draft.activeToken = activeToken;
-    });
+    setSearchQuery(searchQuery);
+    setActiveToken(activeToken);
   };
 
   // grab search from URL if given
   onSettled(() => {
     const defaultSearch = getDefaultSearch();
-    if (defaultSearch) search(defaultSearch);
+    if (defaultSearch) enqueueSearch(defaultSearch);
   });
 
   return (
     <SearchStoreContext
       value={{
-        store,
-        search,
+        searchQuery: searchQuery,
         searchResults: sortedSearchResults,
+        enqueueSearch,
         restoreExistingSearch,
       }}
     >
@@ -191,6 +167,8 @@ export const SearchStoreProvider: ParentComponent = (props) => {
 
 export type CollatedSearchResults = {
   atLimit: boolean;
+  prefilterCount: number;
+  postfilterCount: number;
   responses: UserResponse[];
 };
 
@@ -221,12 +199,12 @@ export type UserFile = {
 };
 
 function filterSearchResults(
-  results: CollatedSearchResults,
+  results: Omit<CollatedSearchResults, "prefilterCount" | "postfilterCount">,
   // WARN: tracked!!
   filters: Readonly<FilterStore>,
 ) {
   const filtered: UserResponse[] = [];
-  const filterString = filters.filterString?.toLowerCase();
+  const filterString = filters.filterString?.toLowerCase().trim();
 
   for (const item of results.responses) {
     if (filters.hidePrivate && item.isPrivate) continue;
@@ -266,11 +244,31 @@ function filterSearchResults(
   return filtered;
 }
 
+async function* collateAllSearchResults(
+  token: number,
+  apiEndpoint: string,
+  limit: number = 1000,
+) {
+  let remainingAttempts = 10;
+  while (remainingAttempts > 0) {
+    console.log('attempting refresh', remainingAttempts);
+    const results = await collateSearchResults(token, apiEndpoint, limit);
+    yield results;
+
+    if (results.atLimit) {
+      break;
+    } else {
+      remainingAttempts--;
+      await new Promise((resolve) => setTimeout(resolve, 300));
+    }
+  }
+}
+
 async function collateSearchResults(
   token: number,
   apiEndpoint: string,
-  limit: number = 1500,
-): Promise<CollatedSearchResults> {
+  limit: number = 1000,
+): Promise<Omit<CollatedSearchResults, "prefilterCount" | "postfilterCount">> {
   const results = await getSearchResults(apiEndpoint, { token, limit });
 
   // might be overwrought
@@ -407,8 +405,8 @@ function scoreFileByQuality(file: UserFile): number {
     return Math.max(
       5,
       5 +
-        Math.min(2, (samplerate - 44100) / 25950.0) +
-        Math.min(3, bitDepth / 8.0),
+      Math.min(2, (samplerate - 44100) / 25950.0) +
+      Math.min(3, bitDepth / 8.0),
     );
   }
 

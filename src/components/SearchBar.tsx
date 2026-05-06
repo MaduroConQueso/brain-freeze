@@ -1,7 +1,9 @@
 import {
   createOptimistic,
   For,
+  isPending,
   Loading,
+  Show,
   useContext,
   type Component,
 } from "solid-js";
@@ -15,10 +17,11 @@ import { FilterDialog } from "./FilterDialog";
 import styles from "./SearchBar.module.css";
 
 export const SearchBar: Component = () => {
-  const { store: settings } = useContext(SettingsStoreContext);
-  const { store, search: enqueueSearch } = useContext(SearchStoreContext);
+  const { searchQuery, searchResults, enqueueSearch } =
+    useContext(SearchStoreContext);
+  const isSearchPending = () => isPending(() => searchResults());
 
-  const onSearch = async (evt: SubmitEvent) => {
+  const onSearch = (evt: SubmitEvent) => {
     evt.preventDefault();
     (document.activeElement as HTMLElement)?.blur();
 
@@ -32,11 +35,11 @@ export const SearchBar: Component = () => {
       return;
     }
 
-    await enqueueSearch(searchQuery);
+    enqueueSearch(searchQuery);
   };
 
   return (
-    <div class={styles.searchBar}>
+    <div class={[styles.searchBar, isSearchPending() && styles.pendingGlow]}>
       <form class={styles.searchForm} method="dialog" onSubmit={onSearch}>
         <input
           class={styles.search}
@@ -44,7 +47,7 @@ export const SearchBar: Component = () => {
           name="search"
           placeholder="Search..."
           enterkeyhint="search"
-          value={store.searchQuery}
+          value={searchQuery()}
         />
       </form>
       <div class={styles.moreRow}>
@@ -60,7 +63,12 @@ export const SearchBar: Component = () => {
           command="show-modal"
           commandfor="filter-dialog"
         >
-          Filters
+          <span>Filters</span>
+          <Loading>
+            <Show when={searchResults()?.postfilterCount !== searchResults()?.prefilterCount}>
+              <strong class={styles.filterCount}>&nbsp;({searchResults()?.postfilterCount}/{searchResults()?.prefilterCount})</strong>
+            </Show>
+          </Loading>
         </button>
       </div>
 

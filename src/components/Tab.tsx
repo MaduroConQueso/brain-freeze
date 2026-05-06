@@ -37,7 +37,7 @@ export const TabBar: Component = () => {
   );
 
   return (
-    <div class={styles["tab-bar"]}>
+    <div class={styles.tabBar}>
       <Tab id="search" name="Search" />
       <Tab id="downloads" name="Downloads" />
       <Tab id="uploads" name="Uploads" />
@@ -67,8 +67,9 @@ const Tab: Component<TabProps> = (props) => {
     <button
       class={{
         [styles.tab]: true,
-        [styles["tab-active"]]: activeTab() === props.id,
+        [styles.tabActive]: activeTab() === props.id,
       }}
+      title={props.name}
       onClick={onClick}
       command={props.command}
       commandfor={props.commandfor}

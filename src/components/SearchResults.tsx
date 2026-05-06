@@ -1,16 +1,11 @@
 import {
-  createEffect,
   createMemo,
-  createRenderEffect,
   createSignal,
   Errored,
-  flush,
   For,
-  isPending,
   Loading,
   onSettled,
   Show,
-  untrack,
   useContext,
   type Component,
 } from "solid-js";
@@ -29,7 +24,6 @@ import styles from "./SearchResults.module.css";
 
 export const SearchResults: Component = () => {
   const { searchResults } = useContext(SearchStoreContext);
-  const searchRefreshing = () => isPending(() => searchResults());
 
   const [queueDialogProps, setQueueDialogProps] =
     createSignal<Omit<QueueDownloadDialogProps, "onClose">>();
@@ -55,7 +49,7 @@ export const SearchResults: Component = () => {
   return (
     <main class={styles.searchResults}>
       <Errored fallback={(error) => <pre>{error()}</pre>}>
-        <Loading fallback={<p>Loading...</p>}>
+        <Loading>
           <For each={searchResults()?.responses}>
             {(response) => (
               <UserItems

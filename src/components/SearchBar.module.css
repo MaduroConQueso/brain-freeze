@@ -1,9 +1,29 @@
 .searchBar {
+  position: relative;
   margin: 12px 12px 0;
 
   display: grid;
   grid-template-columns: 1fr auto;
-  grid-template-rows: 48px min-content;
+  grid-template-rows: auto min-content;
+}
+
+.searchBar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 67;
+  pointer-events: none;
+
+  transition: outline 0.75s ease;
+  outline: 3px double transparent;
+}
+
+.searchBar.pendingGlow::after {
+  transition: outline 0.0s;
+  outline: 3px double var(--secondary-lighter);
 }
 
 .searchForm {
@@ -12,11 +32,11 @@
 
 .search {
   height: 48px;
+  margin-bottom: 4px;
 
   border: 1px solid var(--grey-light);
   background-color: var(--background-lighter);
   padding-left: 0.5rem;
-  outline: none;
 }
 
 .moreRow {
@@ -28,6 +48,11 @@
 
 .moreButton:first-of-type {
   border-right: 1px dotted var(--grey-mid);
+}
+
+.filterCount {
+  font-weight: 400;
+  color: var(--tertiary);
 }
 
 .searchHistory {

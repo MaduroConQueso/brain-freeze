@@ -84,12 +84,36 @@ export async function getSearchResults(
     requestUrl.searchParams.append("limit", String(limit));
   if (offset !== undefined)
     requestUrl.searchParams.append("offset", String(offset));
-  const response = await fetch(requestUrl, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
 
-  return response.json();
+  let finalSearchResults: SearchResults | undefined;
+  let pageAttempts = 0;
+  while (pageAttempts++ < 5) {
+    const response = await fetch(requestUrl, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const json: SearchResults = await response.json();
+
+    if (finalSearchResults === undefined) finalSearchResults = json;
+    else {
+      finalSearchResults = {
+        ...finalSearchResults,
+        offset: 0,
+        items: finalSearchResults.items.concat(json.items),
+        count: finalSearchResults.count + json.count,
+      }
+    }
+
+    // if this page has less items than the limit, then there won't be any more pages
+    if (json.count < json.limit) break;
+
+    offset = json.offset + json.count;
+    requestUrl.searchParams.set("offset", String(offset));
+  }
+
+  if (finalSearchResults === undefined) throw new Error("No results found");
+  return finalSearchResults;
 }

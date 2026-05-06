@@ -1,4 +1,5 @@
 @layer {
+
   *,
   *::before,
   *::after {
@@ -140,6 +141,7 @@
   }
 
   :focus-visible {
-    outline-offset: 0.2rem;
+    outline-offset: 0rem;
+    outline: 3px double var(--secondary-lighter);
   }
 }

@@ -1,7 +1,7 @@
 {
-  "plugins": ["typescript", "unicorn", "oxc"],
+  "plugins": ["typescript", "css", "unicorn", "oxc"],
   "categories": {
-    "correctness": "error"
+    "correctness": "warn"
   },
   "rules": {},
   "env": {

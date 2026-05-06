@@ -1,19 +1,43 @@
-.tab-bar {
+.tabBar {
   position: fixed;
   width: 100%;
-  left: 12px;
-  bottom: 12px;
+  left: 0px;
+  bottom: 0px;
+  padding: 12px;
+  padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
 
   display: flex;
   flex-direction: row;
   gap: 8px;
+
+  background-color: var(--background-lighter);
 }
 
-.tab:not(.tab-active):hover {
+@media (min-width: 1280px) {
+  .tabBar {
+    justify-content: center;
+  }
+}
+
+.tab::after {
+  display: block;
+  content: attr(title);
+  font-weight: 600;
+
+  height: 0px;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.tab:not(.tabActive):hover {
   color: var(--primary-lighter);
 }
 
-.tab-active {
-  background-color: var(--primary);
-  color: var(--primary-text);
+.tabActive,
+.tabActive:active {
+  /* certain devices (e.g. Samsung Android) stick these on active when the UI changes */
+  background-color: var(--primary) !important;
+  color: var(--primary-text) !important;
+
+  font-weight: 600;
 }

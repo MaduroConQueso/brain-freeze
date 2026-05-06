@@ -1,28 +1,40 @@
 <!doctype html>
 <html lang="en">
-  <head>
+
+<head>
     <meta charset="utf-8" />
+    <meta name="description" content="Client for api-********-plus" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
-    <meta
-      name="theme-color"
-      content="#faf4ed"
-      media="(prefers-color-scheme: light)"
-    />
-    <meta
-      name="theme-color"
-      content="#2a2a2a"
-      media="(prefers-color-scheme: dark)"
-    />
+    <meta name="canonical" content="https://brainfreeze.termina.li/" />
+    <meta name="color-scheme" content="light dark">
+    <meta name="theme-color" content="#faf4ed" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#2a2a2a" media="(prefers-color-scheme: dark)" />
+    <meta name="darkreader-lock">
+
+    <meta name="og:title" content="Brain Freeze" />
+    <meta name="og:description" content="Client for api-********-plus" />
+    <meta name="og:url" content="https://brainfreeze.termina.li/" />
+
     <title>Brain Freeze</title>
 
     <link href="/assets/reset.css" rel="stylesheet" />
     <link href="/assets/global.css" rel="stylesheet" />
-  </head>
-  <body>
+</head>
+
+<body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>
+    <div id="root">
+        <div class="no-show">
+            <h1>Welcome to Brain Freeze.</h1>
+            <p>
+                If you're seeing this, that means that the root Javascript bundle failed to load or execute.
+                Are you having network issues? Am I having network issues?
+                Who knows? Try refreshing the page.
+            </p>
+        </div>
+    </div>
 
     <script src="/src/index.tsx" type="module"></script>
-  </body>
+</body>
+
 </html>

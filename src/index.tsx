@@ -11,4 +11,5 @@ if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
   );
 }
 
-render(() => <Snapp />, root!);
+root!.innerHTML = "";
+render(() => <Snapp />, root!, undefined);

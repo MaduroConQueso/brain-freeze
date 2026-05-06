@@ -42,6 +42,13 @@
     sans-serif;
 }
 
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* nothing, this is just to inform the browser that dark mode is supported */
+    --nothing: 123;
+  }
+}
+
 :root button:not(:disabled),
 :root [role="button"]:not(:disabled) {
   cursor: pointer;
@@ -90,5 +97,29 @@ input[type="radio"] {
   #root {
     max-width: 1280px;
     margin: 0 auto;
+  }
+}
+
+.no-show {
+  height: 0px;
+  animation-name: show-in;
+  animation-duration: 5s;
+  animation-fill-mode: forwards;
+}
+
+@keyframes show-in {
+  0% {
+    height: 0px;
+    opacity: 0.0;
+  }
+
+  25% {
+    height: auto;
+    opacity: 0.0;
+  }
+
+  100% {
+    height: auto;
+    opacity: 1.0;
   }
 }

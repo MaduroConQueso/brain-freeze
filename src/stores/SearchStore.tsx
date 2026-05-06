@@ -189,13 +189,14 @@ export type UserFile = {
   /**
    * - 0: lossy compression kbps
    * - 1: duration in seconds
-   * - 2: ??? have only seen as '0'
+   * - 2: ??? have only seen as '0' - might mean VBR
    * - 3: n/a
    * - 4: lossless sampling rate (eg 44100)
    * - 5: lossless bit depth (eg 16)
    */
   attributes: Record<string, number>;
   fullPath: string;
+  sizeInBytes: number;
 };
 
 function filterSearchResults(
@@ -307,6 +308,7 @@ async function collateSearchResults(
       extension: item.extension,
       attributes: item.file_attributes,
       fullPath: item.file_path,
+      sizeInBytes: item.size,
     });
 
     userResponse.folders[folderName] = folder;

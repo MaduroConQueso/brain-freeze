@@ -2,6 +2,10 @@ export type EnqueueDownloadArgs = {
   username: string;
   virtual_path: string;
   folder_path?: string;
+  /** Size of file in bytes. We include this otherwise Nicotine won't be able to track download progress. */
+  size?: number;
+  /** Nicotine similarly uses this to show additional metadata during donwloads. */
+  file_attributes?: Record<string, number>;
   bypass_filter?: boolean;
 };
 
@@ -17,6 +21,8 @@ export async function enqueueDownload(
     username,
     virtual_path,
     folder_path,
+    size,
+    file_attributes,
     bypass_filter = false,
   }: EnqueueDownloadArgs,
 ): Promise<EnqueuedDownload> {
@@ -30,6 +36,8 @@ export async function enqueueDownload(
       username,
       virtual_path,
       folder_path,
+      size,
+      file_attributes,
       bypass_filter,
     }),
   });

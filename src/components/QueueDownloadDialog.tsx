@@ -21,18 +21,20 @@ export const QueueDownloadDialog: Component<QueueDownloadDialogProps> = (
 ) => {
   const { store: settings } = useContext(SettingsStoreContext);
 
-  const downloadFolder = async (username: string, filePaths: string[]) => {
+  const downloadFolder = async (username: string, files: UserFile[]) => {
     // TODO convert to an action
     // optimistically update DownloadStore when it exists
     const results = await Promise.all(
-      filePaths.map((filePath) =>
+      files.map((file) =>
         enqueueDownload(settings.apiEndpoint, {
           username,
-          virtual_path: filePath,
+          virtual_path: file.fullPath,
           folder_path: settings.downloadFolder
-            ? `${settings.downloadFolder}/${getParentFolder(filePath)}`
+            ? `${settings.downloadFolder}/${getParentFolder(file.fullPath)}`
             : undefined,
           bypass_filter: false,
+          size: file.sizeInBytes,
+          file_attributes: file.attributes,
         }),
       ),
     );
@@ -43,7 +45,7 @@ export const QueueDownloadDialog: Component<QueueDownloadDialogProps> = (
   const onDownload = async () => {
     await downloadFolder(
       props.response.username,
-      props.files.map((file) => file.fullPath),
+      props.files,
     );
 
     const dialog = document.getElementById(
@@ -68,7 +70,7 @@ export const QueueDownloadDialog: Component<QueueDownloadDialogProps> = (
 };
 
 function getParentFolder(filePath: string): string {
-  const path = filePath.split(/[\/\\]/);
+  const path = filePath.split(/[/\\]/);
   if (path.length < 2) return "";
   return path[path.length - 2];
 }

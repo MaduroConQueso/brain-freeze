@@ -1,11 +1,11 @@
 import {
   createOptimistic,
   For,
+  isPending,
   Loading,
-  refresh,
   Show,
   useContext,
-  type Component
+  type Component,
 } from "solid-js";
 
 import { getSearchHistory, HistoricalSearch } from "../api/search";
@@ -17,21 +17,11 @@ import { FilterDialog } from "./FilterDialog";
 import styles from "./SearchBar.module.css";
 
 export const SearchBar: Component = () => {
-  const { searchQuery, searchResults, enqueueSearch, isStreamingResults } =
+  const { searchQuery, searchResults, enqueueSearch } =
     useContext(SearchStoreContext);
+  const isSearchPending = () => isPending(() => searchResults());
 
-  const { store: settings } = useContext(SettingsStoreContext);
-  const [searchHistory] = createOptimistic<
-    HistoricalSearch[]
-  >((prev = []) => {
-    if (!settings.apiEndpoint) {
-      return prev;
-    }
-
-    return getSearchHistory(settings.apiEndpoint);
-  });
-
-  const onSearch = async (evt: SubmitEvent) => {
+  const onSearch = (evt: SubmitEvent) => {
     evt.preventDefault();
     (document.activeElement as HTMLElement)?.blur();
 
@@ -45,12 +35,11 @@ export const SearchBar: Component = () => {
       return;
     }
 
-    await enqueueSearch(searchQuery);
-    refresh(searchHistory);
+    enqueueSearch(searchQuery);
   };
 
   return (
-    <div class={[styles.searchBar, isStreamingResults() && styles.pendingGlow]}>
+    <div class={[styles.searchBar, isSearchPending() && styles.pendingGlow]}>
       <form class={styles.searchForm} method="dialog" onSubmit={onSearch}>
         <input
           class={styles.search}
@@ -67,7 +56,7 @@ export const SearchBar: Component = () => {
           command="show-modal"
           commandfor="history-dialog"
         >
-          {isStreamingResults() ? "PENDING" : "History"}
+          History
         </button>
         <button
           class={styles.moreButton}
@@ -86,7 +75,6 @@ export const SearchBar: Component = () => {
       <Dialog id="history-dialog">
         <Loading fallback={<pre>Loading...</pre>}>
           <SearchHistory
-            searchHistory={searchHistory()}
             onHistory={() => {
               (
                 document.getElementById(
@@ -103,8 +91,19 @@ export const SearchBar: Component = () => {
   );
 };
 
-export const SearchHistory: Component<{ searchHistory: HistoricalSearch[]; onHistory?: () => void }> = (props) => {
+export const SearchHistory: Component<{ onHistory?: () => void }> = (props) => {
+  const { store: settings } = useContext(SettingsStoreContext);
   const { restoreExistingSearch } = useContext(SearchStoreContext);
+
+  const [searchHistory, _setOptimisticSearchHistory] = createOptimistic<
+    HistoricalSearch[]
+  >((prev = []) => {
+    if (!settings.apiEndpoint) {
+      return prev;
+    }
+
+    return getSearchHistory(settings.apiEndpoint);
+  });
 
   const onClick = (search: HistoricalSearch) => {
     restoreExistingSearch(search.query, search.token);
@@ -113,7 +112,7 @@ export const SearchHistory: Component<{ searchHistory: HistoricalSearch[]; onHis
 
   return (
     <ul class={styles.searchHistory}>
-      <For each={props.searchHistory}>
+      <For each={searchHistory()}>
         {(search) => (
           <li class={styles.searchHistoryLine}>
             <a href="#" onClick={() => onClick(search())}>

@@ -1,13 +1,11 @@
 import {
   Accessor,
-  action,
   createContext,
   createMemo,
-  createOptimistic,
   createSignal,
   onSettled,
   ParentComponent,
-  useContext
+  useContext,
 } from "solid-js";
 
 import { getSearchResults, postSearch, SearchItem } from "../api/search";
@@ -21,12 +19,10 @@ export type SearchStore = {
 
 export type SearchStoreContextType = {
   searchQuery: Accessor<string>;
+  searchResults: Accessor<CollatedSearchResults | undefined>;
 
-  isStreamingResults: Accessor<boolean>;
-  searchResults: Accessor<FilteredCollatedResults | undefined>;
-
-  enqueueSearch: (searchQuery: string) => Promise<void>;
-  restoreExistingSearch: (searchQuery: string, activeToken: number) => Promise<void>;
+  enqueueSearch: (searchQuery: string) => void;
+  restoreExistingSearch: (searchQuery: string, activeToken: number) => void;
 };
 
 export const SearchStoreContext = createContext<SearchStoreContextType>();
@@ -35,29 +31,24 @@ export const SearchStoreProvider: ParentComponent = (props) => {
   const { store: filters } = useContext(FilterStoreContext);
 
   const [searchQuery, setSearchQuery] = createSignal("");
+  const [activeToken, setActiveToken] = createSignal<number | undefined>();
 
-  const [searchResultsStream, setSearchResultsStream] =
-    createSignal<CollatedSearchResults | undefined>();
+  const searchResultsStream = createMemo(async function* () {
+    const token = activeToken();
+    if (token === undefined) return;
 
-  const [isStreamingResults, setIsStreamingResults] = createOptimistic(false);
-  const streamSearch = action(function* (token: number, apiEndpoint: string) {
-    setIsStreamingResults(true);
+    const apiEndpoint = settings.apiEndpoint;
 
-    const generator = collateAllSearchResults(token, apiEndpoint);
-    while (true) {
-      const { value: results, done } = (yield generator.next()) as IteratorResult<CollatedSearchResults, void>;
-      if (done) break;
-
-      setSearchResultsStream(results);
+    for await (const results of collateAllSearchResults(token, apiEndpoint)) {
+      yield results;
     }
-
-    setIsStreamingResults(false);
   });
 
-  const filteredSearchResults = createMemo<FilteredCollatedResults | undefined>(
+  const filteredSearchResults = createMemo<CollatedSearchResults | undefined>(
     (prev) => {
       const results = searchResultsStream();
-      if (!results || results.responses.length <= 0 || !results.atLimit) return prev;
+      if (results === undefined) return prev;
+      if (results.responses.length <= 0 && !results.atLimit) return prev;
 
       console.time('filterSearchResults')
       const prefilterFolderCount = results.responses.flatMap(response => Object.values(response.folders)).length;
@@ -76,13 +67,65 @@ export const SearchStoreProvider: ParentComponent = (props) => {
     },
   );
 
-  const sortedSearchResults = createMemo<FilteredCollatedResults | undefined>(
+  const sortedSearchResults = createMemo<CollatedSearchResults | undefined>(
     (prev) => {
       let results = filteredSearchResults();
-      if (!results) return prev;
+      if (results === undefined) return prev;
 
       console.time('sortedSearchResults')
-      results = sortResults(results, filters);
+
+      if (filters.sort === "relevancy") {
+        const sorted = results.responses;
+
+        results = {
+          ...results,
+          responses:
+            filters.sortDirection === "asc" ? sorted.toReversed() : sorted,
+        };
+      }
+
+      if (filters.sort === "smartStort") {
+        const sortDirection = filters.sortDirection === "asc" ? -1 : 1;
+        const sorted = results.responses.toSorted((a, b) => {
+          const aScore = smartScore(a);
+          const bScore = smartScore(b);
+          return (bScore - aScore) * sortDirection;
+        });
+
+        results = {
+          ...results,
+          responses: sorted,
+        };
+      }
+
+      if (filters.sort === "quality") {
+        const sortDirection = filters.sortDirection === "asc" ? -1 : 1;
+        const sorted = results.responses.toSorted((a, b) => {
+          const aScore = scoreResponseByQuality(a);
+          const bScore = scoreResponseByQuality(b);
+          return (bScore - aScore) * sortDirection;
+        });
+
+        results = {
+          ...results,
+          responses: sorted,
+        };
+      }
+
+      if (filters.sort === "downloadSpeed") {
+        const sortDirection = filters.sortDirection === "asc" ? -1 : 1;
+        const sorted = results.responses.toSorted((a, b) => {
+          const aScore = a.uploadSpeed;
+          const bScore = b.uploadSpeed;
+          return (bScore - aScore) * sortDirection;
+        });
+
+        results = {
+          ...results,
+          responses: sorted,
+        };
+      }
+
       console.timeEnd('sortedSearchResults')
 
       return results;
@@ -94,12 +137,12 @@ export const SearchStoreProvider: ParentComponent = (props) => {
     if (!settings.apiEndpoint) return;
 
     const postResults = await postSearch(settings.apiEndpoint, query);
-    return streamSearch(postResults.token, settings.apiEndpoint);
+    setActiveToken(postResults.token);
   };
 
-  const restoreExistingSearch = async (searchQuery: string, activeToken: number) => {
+  const restoreExistingSearch = (searchQuery: string, activeToken: number) => {
     setSearchQuery(searchQuery);
-    return streamSearch(activeToken, settings.apiEndpoint);
+    setActiveToken(activeToken);
   };
 
   // grab search from URL if given
@@ -112,7 +155,6 @@ export const SearchStoreProvider: ParentComponent = (props) => {
     <SearchStoreContext
       value={{
         searchQuery: searchQuery,
-        isStreamingResults,
         searchResults: sortedSearchResults,
         enqueueSearch,
         restoreExistingSearch,
@@ -125,12 +167,9 @@ export const SearchStoreProvider: ParentComponent = (props) => {
 
 export type CollatedSearchResults = {
   atLimit: boolean;
-  responses: UserResponse[];
-};
-
-export type FilteredCollatedResults = CollatedSearchResults & {
   prefilterCount: number;
   postfilterCount: number;
+  responses: UserResponse[];
 };
 
 export type UserResponse = {
@@ -160,29 +199,70 @@ export type UserFile = {
   sizeInBytes: number;
 };
 
-const MAX_ATTEMPTS = 10;
+function filterSearchResults(
+  results: Omit<CollatedSearchResults, "prefilterCount" | "postfilterCount">,
+  // WARN: tracked!!
+  filters: Readonly<FilterStore>,
+) {
+  const filtered: UserResponse[] = [];
+  const filterString = filters.filterString?.toLowerCase().trim();
+
+  for (const item of results.responses) {
+    if (filters.hidePrivate && item.isPrivate) continue;
+    if (filters.hideQueue && item.queuePosition > 0) continue;
+
+    const filteredItemFolders: Record<string, UserFile[]> = {};
+    for (const [folderName, folder] of Object.entries(item.folders)) {
+      const filteredFolder: UserFile[] = [];
+      for (const file of folder) {
+        if (
+          filterString &&
+          !file.fullPath.toLowerCase().includes(filterString) &&
+          !item.username.toLowerCase().includes(filterString)
+        )
+          continue;
+        if (!matchesCategory(file, filters.fileType)) continue;
+        if (
+          filters.minQuality.trim() &&
+          !hasMinimumQuality(file, filters.minQuality)
+        )
+          continue;
+
+        filteredFolder.push(file);
+      }
+
+      if (
+        filters.minFilesInFolder > filteredFolder.length ||
+        filteredFolder.length <= 0
+      )
+        continue;
+      filteredItemFolders[folderName] = filteredFolder;
+    }
+
+    if (Object.keys(filteredItemFolders).length === 0) continue;
+    filtered.push({ ...item, folders: filteredItemFolders });
+  }
+  return filtered;
+}
+
 async function* collateAllSearchResults(
   token: number,
   apiEndpoint: string,
   limit: number = 1000,
 ) {
-  let remainingAttempts = MAX_ATTEMPTS;
+  let remainingAttempts = 10;
   while (remainingAttempts > 0) {
     console.log('attempting refresh', remainingAttempts);
     const results = await collateSearchResults(token, apiEndpoint, limit);
     yield results;
 
     if (results.atLimit) {
-      return;
+      break;
     } else {
-      await new Promise((resolve) => setTimeout(resolve, 500 + (MAX_ATTEMPTS - remainingAttempts) * 200));
       remainingAttempts--;
+      await new Promise((resolve) => setTimeout(resolve, 300));
     }
   }
-
-  // we exhausted all attempts and still haven't reached the limit
-  // so we're at the end of the results
-  return;
 }
 
 async function collateSearchResults(
@@ -192,10 +272,16 @@ async function collateSearchResults(
 ): Promise<Omit<CollatedSearchResults, "prefilterCount" | "postfilterCount">> {
   const results = await getSearchResults(apiEndpoint, { token, limit });
 
-  const usernameMap: Record<string, UserResponse> = {};
+  // might be overwrought
+  // I believe ES2015 now preserves insertion order for objects
+  const usernameIndexLookup: Record<string, number> = {};
+  const userResponses: UserResponse[] = [];
+
   const getOrMakeUser = (item: SearchItem): UserResponse => {
-    if (!usernameMap[item.username]) {
-      usernameMap[item.username] = {
+    if (usernameIndexLookup[item.username] !== undefined) {
+      return userResponses[usernameIndexLookup[item.username]];
+    } else {
+      const userResponse: UserResponse = {
         username: item.username,
         isPrivate: item.is_private,
         freeUploadSlots: item.free_upload_slots,
@@ -203,9 +289,12 @@ async function collateSearchResults(
         uploadSpeed: item.upload_speed,
         folders: {},
       };
-    }
 
-    return usernameMap[item.username];
+      usernameIndexLookup[userResponse.username] = userResponses.length;
+      userResponses.push(userResponse);
+
+      return userResponse;
+    }
   };
 
   for (const item of results.items) {
@@ -236,111 +325,8 @@ async function collateSearchResults(
 
   return {
     atLimit,
-    responses: Object.values(usernameMap),
+    responses: userResponses,
   };
-}
-
-function filterSearchResults(
-  results: Omit<CollatedSearchResults, "prefilterCount" | "postfilterCount">,
-  // WARN: tracked!!
-  filters: Readonly<FilterStore>,
-) {
-  const filtered: UserResponse[] = [];
-
-  for (const item of results.responses) {
-    if (filters.hidePrivate && item.isPrivate) continue;
-    if (filters.hideQueue && item.queuePosition > 0) continue;
-
-    const filteredItemFolders: Record<string, UserFile[]> = {};
-    for (const [folderName, folder] of Object.entries(item.folders)) {
-      const filteredFolder: UserFile[] = [];
-      for (const file of folder) {
-        if (
-          filters.filterString &&
-          !file.fullPath.toLowerCase().includes(filters.filterString) &&
-          !item.username.toLowerCase().includes(filters.filterString)
-        )
-          continue;
-        if (!matchesCategory(file, filters.fileType)) continue;
-        if (
-          filters.minQuality &&
-          !hasMinimumQuality(file, filters.minQuality)
-        )
-          continue;
-
-        filteredFolder.push(file);
-      }
-
-      if (
-        filters.minFilesInFolder > filteredFolder.length ||
-        filteredFolder.length <= 0
-      )
-        continue;
-      filteredItemFolders[folderName] = filteredFolder;
-    }
-
-    if (Object.keys(filteredItemFolders).length === 0) continue;
-    filtered.push({ ...item, folders: filteredItemFolders });
-  }
-  return filtered;
-}
-
-function sortResults(
-  results: FilteredCollatedResults,
-  // WARM: tracked!
-  filters: Readonly<FilterStore>,
-) {
-  if (filters.sort === "relevancy") {
-    const sorted = results.responses;
-
-    results = {
-      ...results,
-      responses: filters.sortDirection === "asc" ? sorted.toReversed() : sorted,
-    };
-  }
-
-  if (filters.sort === "smartStort") {
-    const sortDirection = filters.sortDirection === "asc" ? -1 : 1;
-    const sorted = results.responses.toSorted((a, b) => {
-      const aScore = smartScore(a);
-      const bScore = smartScore(b);
-      return (bScore - aScore) * sortDirection;
-    });
-
-    results = {
-      ...results,
-      responses: sorted,
-    };
-  }
-
-  if (filters.sort === "quality") {
-    const sortDirection = filters.sortDirection === "asc" ? -1 : 1;
-    const sorted = results.responses.toSorted((a, b) => {
-      const aScore = scoreResponseByQuality(a);
-      const bScore = scoreResponseByQuality(b);
-      return (bScore - aScore) * sortDirection;
-    });
-
-    results = {
-      ...results,
-      responses: sorted,
-    };
-  }
-
-  if (filters.sort === "downloadSpeed") {
-    const sortDirection = filters.sortDirection === "asc" ? -1 : 1;
-    const sorted = results.responses.toSorted((a, b) => {
-      const aScore = a.uploadSpeed;
-      const bScore = b.uploadSpeed;
-      return (bScore - aScore) * sortDirection;
-    });
-
-    results = {
-      ...results,
-      responses: sorted,
-    };
-  }
-  return results;
 }
 
 function getFolderAndFileName(path: string): [string, string] {
@@ -434,13 +420,14 @@ function hasMinimumQuality(file: UserFile, qualityString: string): boolean {
   if (category === "all") return false;
 
   if (category === "lossy") {
-    return (file.attributes[0] || 0) >= Number(qualityString);
+    return (file.attributes[0] || 0) >= Number(qualityString.trim());
   }
 
   if (category === "lossless") {
     const samplerate = file.attributes[4] || 0;
     const bitDepth = file.attributes[5] || 0;
     const [qBitDepth, qSampleRate] = qualityString
+      .trim()
       .split("/")
       .map(Number);
 

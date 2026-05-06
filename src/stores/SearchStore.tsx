@@ -1,9 +1,7 @@
 import {
   Accessor,
-  action,
   createContext,
   createMemo,
-  createOptimistic,
   createSignal,
   onSettled,
   ParentComponent,
@@ -39,20 +37,17 @@ export const SearchStoreProvider: ParentComponent = (props) => {
   const [searchResultsStream, setSearchResultsStream] =
     createSignal<CollatedSearchResults | undefined>();
 
-  const [isStreamingResults, setIsStreamingResults] = createOptimistic(false);
-  const streamSearch = action(function* (token: number, apiEndpoint: string) {
+  const [isStreamingResults, setIsStreamingResults] = createSignal(false);
+
+  const streamSearch = async function (token: number, apiEndpoint: string) {
     setIsStreamingResults(true);
 
-    const generator = collateAllSearchResults(token, apiEndpoint);
-    while (true) {
-      const { value: results, done } = (yield generator.next()) as IteratorResult<CollatedSearchResults, void>;
-      if (done) break;
-
+    for await (const results of collateAllSearchResults(token, apiEndpoint)) {
       setSearchResultsStream(results);
     }
 
     setIsStreamingResults(false);
-  });
+  };
 
   const filteredSearchResults = createMemo<FilteredCollatedResults | undefined>(
     (prev) => {

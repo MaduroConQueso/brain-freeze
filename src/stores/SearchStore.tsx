@@ -20,6 +20,7 @@ export type SearchStore = {
 export type SearchStoreContextType = {
   searchQuery: Accessor<string>;
   searchResults: Accessor<CollatedSearchResults | undefined>;
+  isStreamingResults: Accessor<boolean>;
 
   enqueueSearch: (searchQuery: string) => void;
   restoreExistingSearch: (searchQuery: string, activeToken: number) => void;
@@ -32,16 +33,19 @@ export const SearchStoreProvider: ParentComponent = (props) => {
 
   const [searchQuery, setSearchQuery] = createSignal("");
   const [activeToken, setActiveToken] = createSignal<number | undefined>();
+  const [isStreamingResults, setIsStreamingResults] = createSignal(false, { ownedWrite: true });
 
   const searchResultsStream = createMemo(async function* () {
     const token = activeToken();
     if (token === undefined) return;
 
+    setIsStreamingResults(true);
     const apiEndpoint = settings.apiEndpoint;
 
     for await (const results of collateAllSearchResults(token, apiEndpoint)) {
       yield results;
     }
+    setIsStreamingResults(false);
   });
 
   const filteredSearchResults = createMemo<CollatedSearchResults | undefined>(
@@ -154,6 +158,7 @@ export const SearchStoreProvider: ParentComponent = (props) => {
   return (
     <SearchStoreContext
       value={{
+        isStreamingResults,
         searchQuery: searchQuery,
         searchResults: sortedSearchResults,
         enqueueSearch,

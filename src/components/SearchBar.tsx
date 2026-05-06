@@ -17,9 +17,8 @@ import { FilterDialog } from "./FilterDialog";
 import styles from "./SearchBar.module.css";
 
 export const SearchBar: Component = () => {
-  const { searchQuery, searchResults, enqueueSearch } =
+  const { searchQuery, searchResults, enqueueSearch, isStreamingResults } =
     useContext(SearchStoreContext);
-  const isSearchPending = () => isPending(() => searchResults());
 
   const onSearch = (evt: SubmitEvent) => {
     evt.preventDefault();
@@ -39,7 +38,7 @@ export const SearchBar: Component = () => {
   };
 
   return (
-    <div class={[styles.searchBar, isSearchPending() && styles.pendingGlow]}>
+    <div class={[styles.searchBar, isStreamingResults() && styles.pendingGlow]}>
       <form class={styles.searchForm} method="dialog" onSubmit={onSearch}>
         <input
           class={styles.search}

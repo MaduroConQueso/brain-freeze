@@ -66,7 +66,7 @@ export type Download = Required<
   time_left: number;
   queue_position: 0;
   status: string;
-  progress_pct: number;
+  progress_pct: number | null;
 };
 
 export async function getDownloads(

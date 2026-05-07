@@ -6,6 +6,8 @@ export type DownloadResult = {
   activeOnly: boolean;
   fileCount: number;
   groupCount: number;
+  hasActiveDownloads: boolean;
+  hasQueuedDownloads: boolean;
   groups: DownloadGroup[];
 };
 
@@ -31,20 +33,22 @@ export type DownloadItem = {
   progressPercentage: number;
 
   queuePosition: number;
-  downloadStatus: "Finished" | "Paused" | "Queued" | string;
+  downloadStatus: "Finished" | "Paused" | "Queued" | "Transferring" | string;
 };
 
 export function collateDownloadResults(downloads: Downloads): DownloadResult {
-  const downloadGroup = new Map<string, DownloadGroup>();
+  const downloadGroups = new Map<string, DownloadGroup>();
   const now = Date.now();
+  let hasActiveDownloads = false;
+  let hasQueuedDownloads = false;
 
   for (const download of downloads.items) {
     const { user, sourcePath, targetPath, filename } =
       downloadGroupKey(download);
     const groupKey = `${user}-${sourcePath}-${targetPath}`;
 
-    if (!downloadGroup.has(groupKey)) {
-      downloadGroup.set(groupKey, {
+    if (!downloadGroups.has(groupKey)) {
+      downloadGroups.set(groupKey, {
         username: user,
         sourcePath,
         targetPath,
@@ -52,7 +56,7 @@ export function collateDownloadResults(downloads: Downloads): DownloadResult {
       });
     }
 
-    downloadGroup.get(groupKey)?.items.push({
+    downloadGroups.get(groupKey)?.items.push({
       filename,
       fullSourcePath: download.virtual_path,
       fullTargetPath: download.folder_path,
@@ -60,18 +64,33 @@ export function collateDownloadResults(downloads: Downloads): DownloadResult {
       averageSpeed: download.avg_speed,
       timeElapsed: download.time_elapsed,
       timeLeft: download.time_left,
-      progressPercentage: download.progress_pct,
+      progressPercentage: download.progress_pct || 0,
       queuePosition: download.queue_position,
       downloadStatus: download.status as Download["status"],
     });
+
+    if (download.status === "Transferring") hasActiveDownloads = true;
+    if (download.status === "Queued") hasQueuedDownloads = true;
   }
+
+  const [active, completed] = downloadGroups.values().reduce(
+    (acc, download) => {
+      if (download.items.every((item) => item.downloadStatus === "Finished"))
+        acc[1].push(download);
+      else acc[0].push(download);
+      return acc;
+    },
+    [[] as DownloadGroup[], [] as DownloadGroup[]],
+  );
 
   return {
     fetchedAt: now,
     activeOnly: downloads.active_only,
     fileCount: downloads.count,
-    groupCount: downloadGroup.size,
-    groups: Array.from(downloadGroup.values()),
+    groupCount: downloadGroups.size,
+    groups: active.concat(completed),
+    hasActiveDownloads: hasActiveDownloads,
+    hasQueuedDownloads: hasQueuedDownloads,
   };
 }
 

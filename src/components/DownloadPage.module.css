@@ -48,9 +48,39 @@
   margin-right: 8px;
 
   display: inline-block;
+  transform: translateY(-2px);
+
+  width: 0.75em;
+  text-align: left;
 }
 
 .details {
-  font-size: 0.875em;
+  font-size: 1em;
   color: var(--text-secondary);
+
+  display: flex;
+  gap: 8px;
+
+  align-items: center;
+  padding-bottom: 4px;
+}
+
+.statusText {
+  color: var(--secondary);
+  white-space: no-wrap;
+}
+
+.progressBar {
+  width: 160px;
+  height: 1em;
+  background-color: var(--background-mid);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress {
+  width: attr(data-progress);
+  height: 100%;
+  background-color: var(--primary);
+  transition: width 0.3s ease-in-out;
 }

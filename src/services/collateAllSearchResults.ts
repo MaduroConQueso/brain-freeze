@@ -1,3 +1,7 @@
+import {
+  cancellableAsyncIterable,
+  cancellableDelay,
+} from "../utils/cancellableAsyncIterable";
 import { getFolderAndFileName } from "../utils/getFolderAndFileName";
 import { getSearchResults, SearchItem } from "./api/search";
 
@@ -7,6 +11,11 @@ export type CollatedSearchResults = {
   postfilterCount: number;
   responses: UserResponse[];
 };
+
+export type PrefilteredCollatedSearchResults = Omit<
+  CollatedSearchResults,
+  "prefilterCount" | "postfilterCount"
+>;
 
 export type UserResponse = {
   username: string;
@@ -35,32 +44,54 @@ export type UserFile = {
   sizeInBytes: number;
 };
 
-export async function* collateAllSearchResults(
+export function collateAllSearchResults(
   token: number,
   apiEndpoint: string,
   limit: number = 1000,
 ) {
   let remainingAttempts = 10;
-  while (remainingAttempts > 0) {
+  return cancellableAsyncIterable(async (ctx) => {
     console.log("attempting refresh", remainingAttempts);
-    const results = await collateSearchResults(token, apiEndpoint, limit);
-    yield results;
+    const results = await collateSearchResults(
+      token,
+      apiEndpoint,
+      limit,
+      ctx.signal,
+    );
+    remainingAttempts--;
 
     if (results.atLimit) {
-      break;
-    } else {
-      remainingAttempts--;
-      await new Promise((resolve) => setTimeout(resolve, 300));
+      return {
+        continue: false,
+        value: results,
+      };
     }
-  }
+
+    if (remainingAttempts <= 0) {
+      return {
+        continue: false,
+        value: {
+          ...results,
+          atLimit: true,
+        },
+      };
+    }
+
+    await cancellableDelay(300 + (10 - remainingAttempts) * 250, ctx.signal);
+    return {
+      continue: true,
+      value: results,
+    };
+  });
 }
 
 async function collateSearchResults(
   token: number,
   apiEndpoint: string,
   limit: number = 1000,
-): Promise<Omit<CollatedSearchResults, "prefilterCount" | "postfilterCount">> {
-  const results = await getSearchResults(apiEndpoint, { token, limit });
+  signal?: AbortSignal,
+): Promise<PrefilteredCollatedSearchResults> {
+  const results = await getSearchResults(apiEndpoint, { token, limit }, signal);
 
   // might be overwrought
   // I believe ES2015 now preserves insertion order for objects

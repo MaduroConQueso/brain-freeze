@@ -73,6 +73,7 @@ export interface SearchItem {
 export async function getSearchResults(
   endpoint: string,
   { token, limit, offset }: GetSearchResultsArgs,
+  signal?: AbortSignal,
 ): Promise<SearchResults> {
   const requestUrl = new URL("search/results", endpoint);
 
@@ -91,6 +92,7 @@ export async function getSearchResults(
       headers: {
         "Content-Type": "application/json",
       },
+      signal,
     });
 
     const json: SearchResults = await response.json();

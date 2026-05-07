@@ -3,6 +3,8 @@ import {
   createContext,
   createMemo,
   createSignal,
+  flush,
+  isPending,
   onSettled,
   ParentComponent,
   useContext,
@@ -12,12 +14,14 @@ import { postSearch } from "../services/api/search";
 import {
   collateAllSearchResults,
   CollatedSearchResults,
+  PrefilteredCollatedSearchResults,
   UserResponse,
 } from "../services/collateAllSearchResults";
 import {
   filterSearchResults,
   sortSearchResults,
 } from "../services/filterSortSearchResults";
+import { once } from "../utils/cancellableAsyncIterable";
 import { FilterStoreContext } from "./FilterStore";
 import { SettingsStoreContext } from "./SettingsStore";
 
@@ -31,7 +35,7 @@ export type SearchStoreContextType = {
   searchResults: Accessor<CollatedSearchResults | undefined>;
   isStreamingResults: Accessor<boolean>;
 
-  enqueueSearch: (searchQuery: string) => void;
+  enqueueSearch: (searchQuery: string) => Promise<void>;
   restoreExistingSearch: (searchQuery: string, activeToken: number) => void;
 };
 
@@ -40,23 +44,25 @@ export const SearchStoreProvider: ParentComponent = (props) => {
   const { store: settings } = useContext(SettingsStoreContext);
   const { store: filters } = useContext(FilterStoreContext);
 
-  const [searchQuery, setSearchQuery] = createSignal("");
+  const [searchQuery, setSearchQuery] = createSignal<string>("");
   const [activeToken, setActiveToken] = createSignal<number | undefined>();
-  const [isStreamingResults, setIsStreamingResults] = createSignal(false, {
-    ownedWrite: true,
-  });
 
-  const searchResultsStream = createMemo(async function* () {
-    const token = activeToken();
-    if (token === undefined) return;
+  const searchResultsStream = createMemo<PrefilteredCollatedSearchResults>(
+    () => {
+      const token = activeToken();
+      if (token === undefined) {
+        return once({ responses: [], atLimit: true });
+      }
 
-    setIsStreamingResults(true);
-    const apiEndpoint = settings.apiEndpoint;
+      return collateAllSearchResults(token, settings.apiEndpoint);
+    },
+  );
 
-    for await (const results of collateAllSearchResults(token, apiEndpoint)) {
-      yield results;
-    }
-    setIsStreamingResults(false);
+  const isStreamingResults = createMemo<boolean>(() => {
+    return (
+      isPending(() => searchResultsStream()) ||
+      searchResultsStream().atLimit === false
+    );
   });
 
   const filteredSearchResults = createMemo<CollatedSearchResults | undefined>(
@@ -97,7 +103,7 @@ export const SearchStoreProvider: ParentComponent = (props) => {
     },
   );
 
-  const enqueueSearch = async (query: string) => {
+  const enqueueSearch = async function (query: string) {
     setSearchQuery(query);
     if (!settings.apiEndpoint) return;
 
@@ -107,6 +113,8 @@ export const SearchStoreProvider: ParentComponent = (props) => {
 
   const restoreExistingSearch = (searchQuery: string, activeToken: number) => {
     setSearchQuery(searchQuery);
+    flush();
+
     setActiveToken(activeToken);
   };
 
@@ -120,7 +128,7 @@ export const SearchStoreProvider: ParentComponent = (props) => {
     <SearchStoreContext
       value={{
         isStreamingResults,
-        searchQuery: searchQuery,
+        searchQuery,
         searchResults: sortedSearchResults,
         enqueueSearch,
         restoreExistingSearch,

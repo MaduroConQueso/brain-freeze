@@ -10,11 +10,8 @@ import {
   type Component,
 } from "solid-js";
 
-import {
-  SearchStoreContext,
-  UserFile,
-  UserResponse,
-} from "../stores/SearchStore";
+import { UserFile, UserResponse } from "../services/collateAllSearchResults";
+import { SearchStoreContext } from "../stores/SearchStore";
 import {
   QueueDownloadDialog,
   QueueDownloadDialogProps,

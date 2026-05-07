@@ -8,7 +8,7 @@
 }
 
 .searchBar::after {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -22,7 +22,7 @@
 }
 
 .searchBar.pendingGlow::after {
-  transition: outline 0.0s;
+  transition: outline 0s;
   outline: 3px double var(--secondary-lighter);
 }
 

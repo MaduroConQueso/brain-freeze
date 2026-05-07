@@ -1,5 +1,3 @@
-import { SettingsStoreProvider } from "../stores/SettingsStore";
-
 export interface QueuedSearch {
   query: string;
   token: number;
@@ -104,7 +102,7 @@ export async function getSearchResults(
         offset: 0,
         items: finalSearchResults.items.concat(json.items),
         count: finalSearchResults.count + json.count,
-      }
+      };
     }
 
     // if this page has less items than the limit, then there won't be any more pages

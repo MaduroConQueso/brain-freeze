@@ -110,16 +110,16 @@ input[type="radio"] {
 @keyframes show-in {
   0% {
     height: 0px;
-    opacity: 0.0;
+    opacity: 0;
   }
 
   25% {
     height: auto;
-    opacity: 0.0;
+    opacity: 0;
   }
 
   100% {
     height: auto;
-    opacity: 1.0;
+    opacity: 1;
   }
 }

@@ -30,11 +30,13 @@
 }
 
 .content.topGlow {
-  border-top: 2px dotted color-mix(in srgb, var(--secondary-lighter), transparent 70%);
+  border-top: 2px dotted
+    color-mix(in srgb, var(--secondary-lighter), transparent 70%);
 }
 
 .content.bottomGlow {
-  border-bottom: 2px dotted color-mix(in srgb, var(--secondary-lighter), transparent 70%);
+  border-bottom: 2px dotted
+    color-mix(in srgb, var(--secondary-lighter), transparent 70%);
 }
 
 .footer {

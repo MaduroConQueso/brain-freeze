@@ -1,14 +1,13 @@
 import {
   createOptimistic,
   For,
-  isPending,
   Loading,
   Show,
   useContext,
-  type Component,
+  type Component
 } from "solid-js";
 
-import { getSearchHistory, HistoricalSearch } from "../api/search";
+import { getSearchHistory, HistoricalSearch } from "../services/api/search";
 import { SearchStoreContext } from "../stores/SearchStore";
 import { SettingsStoreContext } from "../stores/SettingsStore";
 import { Dialog } from "./Dialog";
@@ -64,8 +63,16 @@ export const SearchBar: Component = () => {
         >
           <span>Filters</span>
           <Loading>
-            <Show when={searchResults()?.postfilterCount !== searchResults()?.prefilterCount}>
-              <strong class={styles.filterCount}>&nbsp;({searchResults()?.postfilterCount}/{searchResults()?.prefilterCount})</strong>
+            <Show
+              when={
+                searchResults()?.postfilterCount !==
+                searchResults()?.prefilterCount
+              }
+            >
+              <strong class={styles.filterCount}>
+                &nbsp;({searchResults()?.postfilterCount}/
+                {searchResults()?.prefilterCount})
+              </strong>
             </Show>
           </Loading>
         </button>

@@ -1,7 +1,7 @@
 import { Component, useContext } from "solid-js";
 
-import { enqueueDownload } from "../api/download";
-import { UserFile, UserResponse } from "../stores/SearchStore";
+import { enqueueDownload } from "../services/api/download";
+import { UserFile, UserResponse } from "../services/collateAllSearchResults";
 import { SettingsStoreContext } from "../stores/SettingsStore";
 import { Dialog } from "./Dialog";
 
@@ -43,10 +43,7 @@ export const QueueDownloadDialog: Component<QueueDownloadDialogProps> = (
   };
 
   const onDownload = async () => {
-    await downloadFolder(
-      props.response.username,
-      props.files,
-    );
+    await downloadFolder(props.response.username, props.files);
 
     const dialog = document.getElementById(
       props.id,

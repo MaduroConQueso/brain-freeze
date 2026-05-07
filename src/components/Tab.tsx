@@ -24,9 +24,9 @@ export const TabBar: Component = () => {
   const location = useLocation();
 
   createEffect(
-    () => settings.apiEndpoint,
-    (endpoint) => {
-      if (!endpoint) {
+    () => settings.isApiEndpointHealthy,
+    (healthyFlag) => {
+      if (!healthyFlag) {
         setActiveTab("settings");
         navigate("/settings");
       }

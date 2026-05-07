@@ -49,3 +49,45 @@ export async function enqueueDownload(
   const data = await response.json();
   return data as EnqueuedDownload;
 }
+
+export type Downloads = {
+  active_only: boolean;
+  count: number;
+  items: Download[];
+};
+
+export type Download = Required<
+  Pick<EnqueuedDownload, "username" | "virtual_path" | "folder_path" | "size">
+> & {
+  current_byte_offset: number;
+  speed: number;
+  avg_speed: number;
+  time_elapsed: number;
+  time_left: number;
+  queue_position: 0;
+  status: string;
+  progress_pct: number;
+};
+
+export async function getDownloads(
+  endpoint: string,
+  activeOnly: boolean = false,
+): Promise<Downloads> {
+  const url = new URL("/downloads", endpoint);
+  const params = new URLSearchParams({ active_only: String(activeOnly) });
+  url.search = params.toString();
+
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to get downloads: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  return data as Downloads;
+}

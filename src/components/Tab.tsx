@@ -1,3 +1,4 @@
+import { useLocation, useNavigate } from "@solidjs/router";
 import { JSX } from "@solidjs/web/jsx-runtime";
 import {
   Component,
@@ -18,30 +19,43 @@ export const [activeTab, setActiveTab] = createSignal<Tabs>("search");
 
 export const TabBar: Component = () => {
   const { store: settings } = useContext(SettingsStoreContext);
-  onSettled(() => {
-    if (!settings.apiEndpoint) {
-      setActiveTab("settings");
-    }
-  });
+  const navigate = useNavigate();
+  const location = useLocation();
 
   createEffect(
-    () => activeTab(),
-    (tab) => {
-      if (tab === "settings") {
-        const dialog = document.getElementById(
-          "settings-dialog",
-        ) as HTMLDialogElement;
-        dialog?.showModal();
+    () => settings.apiEndpoint,
+    (endpoint) => {
+      if (!endpoint) {
+        setActiveTab("settings");
+        navigate("/settings");
       }
     },
   );
 
+  onSettled(() => {
+    if (location.pathname && location.pathname !== "/") {
+      setActiveTab(location.pathname.replace("/", "") as Tabs);
+    }
+  });
+
+  // createEffect(
+  //   () => activeTab(),
+  //   (tab) => {
+  //     if (tab === "settings") {
+  //       const dialog = document.getElementById(
+  //         "settings-dialog",
+  //       ) as HTMLDialogElement;
+  //       dialog?.showModal();
+  //     }
+  //   },
+  // );
+
   return (
     <div class={styles.tabBar}>
-      <Tab id="search" name="Search" />
-      <Tab id="downloads" name="Downloads" />
-      <Tab id="uploads" name="Uploads" />
-      <Tab id="settings" name="Settings" />
+      <Tab id="search" route="/" name="Search" />
+      <Tab id="downloads" route="/downloads" name="Downloads" />
+      <Tab id="uploads" route="/uploads" name="Uploads" />
+      <Tab id="settings" route="/settings" name="Settings" />
       <SettingsDialog
         id="settings-dialog"
         onClose={() => setActiveTab("search")}
@@ -53,14 +67,20 @@ export const TabBar: Component = () => {
 type TabProps = {
   id: Tabs;
   name: string;
+  route?: string;
 
   command?: JSX.ButtonHTMLAttributes<HTMLButtonElement>["command"];
   commandfor?: JSX.ButtonHTMLAttributes<HTMLButtonElement>["commandfor"];
 };
 
 const Tab: Component<TabProps> = (props) => {
+  const navigate = useNavigate();
+
   const onClick = () => {
     setActiveTab(props.id);
+    if (props.route) {
+      navigate(props.route);
+    }
   };
 
   return (

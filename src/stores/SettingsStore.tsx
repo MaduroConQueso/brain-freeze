@@ -9,9 +9,15 @@ import {
 
 import { StoreObject } from "../utils/types";
 
+export const themeMap = {
+  rosePine: "Rose Pine",
+  modus: "Modus",
+};
+
 export type SettingsStore = {
   apiEndpoint: string;
   downloadFolder: string;
+  theme: keyof typeof themeMap;
 };
 
 export type SettingsStoreContextType = StoreObject<SettingsStore> & {};
@@ -24,6 +30,7 @@ export const SettingsStoreProvider: ParentComponent = (props) => {
     JSON.parse(localStorage.getItem("settings") ?? "null") ?? {
       apiEndpoint: "",
       downloadFolder: "",
+      theme: "rosePine",
     },
   );
 
@@ -32,6 +39,13 @@ export const SettingsStoreProvider: ParentComponent = (props) => {
     (store) => {
       const storeSnapshot = snapshot(store);
       localStorage.setItem("settings", JSON.stringify(storeSnapshot));
+    },
+  );
+
+  createEffect(
+    () => store.theme,
+    (theme) => {
+      document.documentElement.className = theme === "rosePine" ? "rose-pine" : "modus";
     },
   );
 

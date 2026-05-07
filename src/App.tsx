@@ -1,4 +1,4 @@
-import { type Component } from "solid-js";
+import { Loading, type Component } from "solid-js";
 
 import { SearchBar } from "./components/SearchBar";
 import { SearchResults } from "./components/SearchResults";
@@ -12,7 +12,9 @@ const Snapp: Component = () => {
     <SettingsStoreProvider>
       <FilterStoreProvider>
         <SearchStoreProvider>
-          <SearchBar />
+          <Loading>
+            <SearchBar />
+          </Loading>
           <SearchResults />
           <TabBar />
         </SearchStoreProvider>

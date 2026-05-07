@@ -1,7 +1,16 @@
 {
-  "plugins": ["typescript", "css", "unicorn", "oxc"],
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": [
+    "typescript",
+    "react",
+    "unicorn",
+    "oxc"
+  ],
   "categories": {
     "correctness": "warn"
+  },
+  "options": {
+    "typeAware": true,
   },
   "rules": {},
   "env": {

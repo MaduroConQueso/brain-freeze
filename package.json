@@ -16,6 +16,8 @@
     "solid-js": "2.0.0-beta.10"
   },
   "devDependencies": {
+    "oxfmt": "^0.48.0",
+    "oxlint": "^1.63.0",
     "solid-better-refresh": "^0.0.4",
     "typescript": "^5.7.2",
     "vite": "^7.1.4",

@@ -52,6 +52,7 @@ export const DownloadPage: Component = () => {
 
   return (
     <main class={pageStyles.page}>
+      <h1>downloads</h1>
       <Loading>
         <Show when={downloads()}>
           {(downloads) => (

@@ -7,3 +7,8 @@
   padding: 12px;
   padding-bottom: 72px;
 }
+
+.page h1 {
+  font-size: 2em;
+  margin: 36px 0 0;
+}

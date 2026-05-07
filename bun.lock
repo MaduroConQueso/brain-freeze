@@ -5,6 +5,7 @@
     "": {
       "name": "brain-freeze",
       "dependencies": {
+        "@solidjs/router": "0.17.0-next.3",
         "@solidjs/web": "2.0.0-beta.10",
         "solid-js": "2.0.0-beta.10",
       },
@@ -164,6 +165,8 @@
     "@rollup/rollup-win32-x64-gnu": ["@rollup/rollup-win32-x64-gnu@4.60.2", "", { "os": "win32", "cpu": "x64" }, "sha512-qdAzEULD+/hzObedtmV6iBpdL5TIbKVztGiK7O3/KYSf+HIzU257+MX1EXJcyIiDbMAqmbwaufcYPvyRryeZtA=="],
 
     "@rollup/rollup-win32-x64-msvc": ["@rollup/rollup-win32-x64-msvc@4.60.2", "", { "os": "win32", "cpu": "x64" }, "sha512-Nd/SgG27WoA9e+/TdK74KnHz852TLa94ovOYySo/yMPuTmpckK/jIF2jSwS3g7ELSKXK13/cVdmg1Z/DaCWKxA=="],
+
+    "@solidjs/router": ["@solidjs/router@0.17.0-next.3", "", { "peerDependencies": { "@solidjs/web": ">=2.0.0-beta.7 <2.0.0-experimental.0", "solid-js": ">=2.0.0-beta.7 <2.0.0-experimental.0" } }, "sha512-zI3bvcSNkIe89Hy5/s4u14OrcCUspUq5FFbqKNME0BuofTnbZmn9MXcG9cdQiNYI2a51JO1q5Ss9fN7YuAjM9Q=="],
 
     "@solidjs/signals": ["@solidjs/signals@2.0.0-beta.10", "", {}, "sha512-McdmbLNiSlz616zcykS8Rb1t9QTOTKdNAoaWd4/OjXEbcAUrPqRX1CWgR+caiWUk4qn0a+LesTTV4jZhFFPaSg=="],
 

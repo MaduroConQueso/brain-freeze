@@ -38,37 +38,42 @@ export const FilterDialog: Component<{ id: string; onClose?: () => void }> = (
           }
         />
       </label>
-      <label class={formStyles.multiline}>
-        <span>Sort</span>
-        <select
-          name="sort"
-          value={store.sort}
-          onChange={(e) =>
-            setStore((filters) => void (filters.sort = e.target.value as Sort))
-          }
-        >
-          <For each={Object.entries(sortMap)}>
-            {(entry) => <option value={entry()[0]}>{entry()[1]}</option>}
-          </For>
-        </select>
-      </label>
-      <label class={formStyles.multiline}>
-        <span>Sort direction</span>
-        <select
-          name="sortDirection"
-          value={store.sortDirection}
-          onChange={(e) =>
-            setStore(
-              (filters) =>
-                void (filters.sortDirection = e.target.value as SortDirection),
-            )
-          }
-        >
-          <For each={Object.entries(sortDirectionMap)}>
-            {(entry) => <option value={entry()[0]}>{entry()[1]}</option>}
-          </For>
-        </select>
-      </label>
+      <div class={formStyles.sideBySide}>
+        <label class={formStyles.multiline}>
+          <span>Sort</span>
+          <select
+            name="sort"
+            value={store.sort}
+            onChange={(e) =>
+              setStore(
+                (filters) => void (filters.sort = e.target.value as Sort),
+              )
+            }
+          >
+            <For each={Object.entries(sortMap)}>
+              {(entry) => <option value={entry()[0]}>{entry()[1]}</option>}
+            </For>
+          </select>
+        </label>
+        <label class={formStyles.multiline}>
+          <span>Direction</span>
+          <select
+            name="sortDirection"
+            value={store.sortDirection}
+            onChange={(e) =>
+              setStore(
+                (filters) =>
+                  void (filters.sortDirection = e.target
+                    .value as SortDirection),
+              )
+            }
+          >
+            <For each={Object.entries(sortDirectionMap)}>
+              {(entry) => <option value={entry()[0]}>{entry()[1]}</option>}
+            </For>
+          </select>
+        </label>
+      </div>
       <label class={formStyles.multiline}>
         <span>File type</span>
         <select

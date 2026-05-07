@@ -5,7 +5,6 @@ import {
 } from "solid-js";
 
 import styles from "./Dialog.module.css";
-
 export const Dialog: ParentComponent<{
   id: string;
   onClose?: () => void;

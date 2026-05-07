@@ -2,6 +2,8 @@ import { useLocation, useNavigate } from "@solidjs/router";
 import { JSX } from "@solidjs/web/jsx-runtime";
 import {
   Component,
+  Match,
+  Switch,
   createEffect,
   createSignal,
   onSettled,
@@ -9,7 +11,6 @@ import {
 } from "solid-js";
 
 import { SettingsStoreContext } from "../stores/SettingsStore";
-import { SettingsDialog } from "./SettingsDialog";
 
 import styles from "./Tab.module.css";
 
@@ -49,18 +50,21 @@ export const TabBar: Component = () => {
   //     }
   //   },
   // );
-
   return (
-    <div class={styles.tabBar}>
-      <Tab id="search" route="/" name="Search" />
-      <Tab id="downloads" route="/downloads" name="Downloads" />
-      <Tab id="uploads" route="/uploads" name="Uploads" />
-      <Tab id="settings" route="/settings" name="Settings" />
-      <SettingsDialog
-        id="settings-dialog"
-        onClose={() => setActiveTab("search")}
-      />
-    </div>
+    <Switch fallback={
+      <div class={styles.tabBar}>
+        <Tab id="settings" route="/settings" name="Settings" />
+      </div>
+    }>
+      <Match when={settings.isApiEndpointHealthy}>
+        <div class={styles.tabBar}>
+          <Tab id="search" route="/" name="Search" />
+          <Tab id="downloads" route="/downloads" name="Downloads" />
+          <Tab id="uploads" route="/uploads" name="Uploads" />
+          <Tab id="settings" route="/settings" name="Settings" />
+        </div>
+      </Match>
+    </Switch>
   );
 };
 

@@ -50,7 +50,7 @@ export const SearchStoreProvider: ParentComponent = (props) => {
   const searchResultsStream = createMemo<PrefilteredCollatedSearchResults>(
     () => {
       const token = activeToken();
-      if (token === undefined) {
+      if (!settings.isApiEndpointHealthy || token === undefined ) {
         return once({ responses: [], atLimit: true });
       }
 
@@ -105,7 +105,7 @@ export const SearchStoreProvider: ParentComponent = (props) => {
 
   const enqueueSearch = async function (query: string) {
     setSearchQuery(query);
-    if (!settings.apiEndpoint) return;
+    if (!settings.isApiEndpointHealthy) return;
 
     const postResults = await postSearch(settings.apiEndpoint, query);
     setActiveToken(postResults.token);

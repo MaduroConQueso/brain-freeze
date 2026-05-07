@@ -23,7 +23,7 @@ export const SearchBar: Component = () => {
   const [searchHistory, _setOptimisticSearchHistory] = createOptimistic<
     HistoricalSearch[]
   >((prev = []) => {
-    if (!settings.apiEndpoint) {
+    if (!settings.isApiEndpointHealthy) {
       return prev;
     }
 

@@ -28,7 +28,7 @@ export const DownloadPage: Component = () => {
   const { store: settings } = useContext(SettingsStoreContext);
   const downloads = createMemo<DownloadResult | undefined>(
     async (prev = undefined) => {
-      if (!settings.apiEndpoint) return prev;
+      if (!settings.isApiEndpointHealthy) return prev;
 
       const rawDownloads = await getDownloads(settings.apiEndpoint, false);
       return collateDownloadResults(rawDownloads);

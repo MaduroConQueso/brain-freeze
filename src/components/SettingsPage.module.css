@@ -1,0 +1,30 @@
+.endpointField {
+  position: relative;
+}
+
+.endpointField input {
+  padding-right: 2rem;
+}
+
+.endpointIcon {
+  position: absolute;
+  top: 50%;
+  right: 0.625rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.125rem;
+  height: 1.125rem;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.endpointIcon svg {
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2.5;
+}
